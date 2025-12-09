@@ -226,11 +226,18 @@
 
         /* Virtue cards */
         .virtue-card {
-            background: rgba(255, 253, 248, 0.6);
+            background: rgba(244, 232, 208, 0.98);
             padding: 1.5rem;
             margin: 1.5rem 0;
-            border: 1px solid rgba(139, 69, 19, 0.15);
-            box-shadow: 2px 2px 6px rgba(42, 24, 16, 0.08);
+            border: 2px solid rgba(139, 69, 19, 0.3);
+            box-shadow:
+                2px 2px 8px rgba(42, 24, 16, 0.15),
+                inset 0 0 40px rgba(139, 69, 19, 0.03);
+        }
+
+        body.dark-mode .virtue-card {
+            background: rgba(58, 48, 38, 0.95);
+            border-color: rgba(201, 164, 86, 0.3);
         }
 
         .virtue-name {
