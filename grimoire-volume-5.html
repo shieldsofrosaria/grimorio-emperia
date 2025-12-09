@@ -216,12 +216,19 @@
         }
 
         .reference-card {
-            background: rgba(255, 253, 248, 0.6);
+            background: rgba(244, 232, 208, 0.98);
             padding: 1rem;
             transition: background 0.3s, color 0.3s;
             margin: 1rem 0;
-            border-left: 3px solid var(--gold-leaf);
-            box-shadow: 2px 2px 6px rgba(42, 24, 16, 0.08);
+            border-left: 4px solid var(--gold-leaf);
+            box-shadow:
+                2px 2px 8px rgba(42, 24, 16, 0.15),
+                inset 0 0 40px rgba(139, 69, 19, 0.03);
+        }
+
+        body.dark-mode .reference-card {
+            background: rgba(58, 48, 38, 0.95);
+            border-left-color: rgba(201, 164, 86, 0.5);
         }
 
         .reference-title {
