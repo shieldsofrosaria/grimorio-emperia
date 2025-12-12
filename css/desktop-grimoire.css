@@ -1,725 +1,130 @@
 /* ========================================
-   GRIMORIO EMPERIA - DESKTOP GRIMOIRE LAYOUT
-   Enhanced layout for larger screens (1024px+)
-   Layers on top of divine-baroque.css
+   GRIMORIO EMPERIA - MINIMAL DESKTOP ENHANCEMENTS
+   Subtle improvements only - no layout breaking
    ======================================== */
 
 /* Only apply on desktop screens */
 @media (min-width: 1024px) {
 
     /* ================================
-       BODY & MAIN LAYOUT
+       SUBTLE CONTAINER IMPROVEMENTS
        ================================ */
     
-    body {
-        background-image: 
-            url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%230a0a0f"/><circle cx="10" cy="10" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="60" cy="40" r="1" fill="%23ffffff" opacity="0.15"/><circle cx="30" cy="80" r="1" fill="%23ffffff" opacity="0.1"/></svg>'),
-            linear-gradient(135deg, var(--void-black) 0%, var(--deep-night) 50%, var(--night-blue) 100%);
-        background-size: 100px 100px, cover;
-    }
-
-    /* Main container becomes a grimoire book */
     .container {
-        display: grid;
-        grid-template-columns: 280px 1fr 280px;
-        grid-template-areas:
-            "left-sidebar header right-sidebar"
-            "left-sidebar nav right-sidebar"
-            "left-sidebar main right-sidebar"
-            "left-sidebar footer right-sidebar";
-        max-width: 1800px;
-        gap: 0;
-        padding: 20px;
-        position: relative;
-    }
-
-    /* Book spine effect */
-    .container::before {
-        content: '';
-        position: absolute;
-        left: 280px;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background: linear-gradient(to bottom, 
-            var(--caerus-bright), 
-            var(--thoth-bright), 
-            var(--caerus-bright));
-        box-shadow: 
-            -2px 0 10px rgba(255, 215, 0, 0.3),
-            2px 0 10px rgba(74, 125, 199, 0.3);
-    }
-
-    .container::after {
-        content: '';
-        position: absolute;
-        right: 280px;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background: linear-gradient(to bottom, 
-            var(--caerus-bright), 
-            var(--thoth-bright), 
-            var(--caerus-bright));
-        box-shadow: 
-            -2px 0 10px rgba(74, 125, 199, 0.3),
-            2px 0 10px rgba(255, 215, 0, 0.3);
-    }
-
-    header {
-        grid-area: header;
-        border-bottom: 2px solid var(--caerus-bright);
-        margin-bottom: 20px;
-        padding-bottom: 30px;
-    }
-
-    nav {
-        grid-area: nav;
-    }
-
-    main {
-        grid-area: main;
-        padding: 0 30px;
-        background: linear-gradient(to bottom, 
-            rgba(26, 35, 50, 0.3), 
-            rgba(42, 63, 95, 0.2));
-        border-radius: 15px;
-        min-height: calc(100vh - 400px);
-    }
-
-    footer {
-        grid-area: footer;
-        margin-top: 40px;
-        padding-top: 30px;
-        border-top: 2px solid var(--caerus-bright);
+        max-width: 1400px;
+        /* No grid changes - keep existing layout */
     }
 
     /* ================================
-       LEFT SIDEBAR - NAVIGATION
+       SMOOTH SCROLLING
        ================================ */
-
-    body::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 300px;
-        height: 100vh;
-        background: linear-gradient(to right, 
-            rgba(10, 10, 15, 0.95), 
-            rgba(26, 35, 50, 0.8));
-        border-right: 2px solid var(--thoth-bright);
-        box-shadow: inset -20px 0 40px rgba(74, 125, 199, 0.2);
-        z-index: 0;
-        pointer-events: none;
-    }
-
-    /* Create left sidebar */
-    .container::after {
-        /* Overriding the spine, we'll use a different method */
-        display: none;
-    }
-
-    /* Sidebar content wrapper */
-    .sidebar-left {
-        grid-area: left-sidebar;
-        position: sticky;
-        top: 20px;
-        height: calc(100vh - 40px);
-        overflow-y: auto;
-        padding: 20px;
-        background: linear-gradient(135deg, 
-            rgba(26, 35, 50, 0.95), 
-            rgba(42, 63, 95, 0.85));
-        border: 2px solid var(--thoth-bright);
-        border-radius: 15px;
-        box-shadow: 
-            inset 0 0 30px rgba(74, 125, 199, 0.1),
-            0 0 20px rgba(74, 125, 199, 0.3);
-    }
-
-    /* If sidebar doesn't exist, create it via pseudo-element */
-    body {
-        position: relative;
+    
+    html {
+        scroll-behavior: smooth;
     }
 
     /* ================================
-       RIGHT SIDEBAR - QUICK ACCESS
+       ENHANCED CARD HOVER (SUBTLE)
        ================================ */
-
-    .sidebar-right {
-        grid-area: right-sidebar;
-        position: sticky;
-        top: 20px;
-        height: calc(100vh - 40px);
-        overflow-y: auto;
-        padding: 20px;
-        background: linear-gradient(135deg, 
-            rgba(42, 63, 95, 0.85), 
-            rgba(26, 35, 50, 0.95));
-        border: 2px solid var(--caerus-bright);
-        border-radius: 15px;
-        box-shadow: 
-            inset 0 0 30px rgba(255, 215, 0, 0.1),
-            0 0 20px rgba(255, 215, 0, 0.3);
-    }
-
-    /* ================================
-       ENHANCED NAVIGATION
-       ================================ */
-
-    nav {
-        background: linear-gradient(to bottom, 
-            rgba(26, 35, 50, 0.95), 
-            rgba(15, 20, 25, 0.95));
-        border: 2px solid var(--thoth-bright);
-        border-radius: 15px;
-        padding: 25px 30px;
-        margin-bottom: 30px;
-        position: relative;
-        box-shadow: 
-            0 4px 15px rgba(74, 125, 199, 0.4),
-            inset 0 0 30px rgba(74, 125, 199, 0.1);
-    }
-
-    nav ul {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        flex-wrap: wrap;
-    }
-
-    nav a {
-        padding: 10px 20px;
-        border: 1px solid var(--thoth-medium);
-        border-radius: 8px;
-        background: rgba(26, 35, 50, 0.6);
-        transition: all 0.3s ease;
-    }
-
-    nav a:hover {
-        background: linear-gradient(135deg, 
-            rgba(74, 125, 199, 0.3), 
-            rgba(107, 163, 255, 0.2));
-        border-color: var(--caerus-bright);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-    }
-
-    /* ================================
-       CARD ENHANCEMENTS
-       ================================ */
-
+    
     .card {
-        background: 
-            linear-gradient(135deg, 
-                rgba(26, 35, 50, 0.95), 
-                rgba(42, 63, 95, 0.9));
-        border: 3px solid var(--thoth-bright);
-        border-radius: 20px;
-        padding: 40px;
-        margin-bottom: 35px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
         box-shadow: 
-            0 8px 25px rgba(74, 125, 199, 0.4),
-            inset 0 0 40px rgba(74, 125, 199, 0.05),
-            0 0 60px rgba(74, 125, 199, 0.2);
-        position: relative;
-        overflow: visible;
-    }
-
-    /* Ornate corners */
-    .card::before,
-    .card::after {
-        content: '✦';
-        position: absolute;
-        font-size: 2rem;
-        color: var(--caerus-bright);
-        text-shadow: 0 0 20px var(--caerus-glow);
-        animation: candleFlicker 3s ease-in-out infinite;
-        z-index: 10;
-    }
-
-    .card::before {
-        top: 15px;
-        left: 15px;
-    }
-
-    .card::after {
-        bottom: 15px;
-        right: 15px;
-    }
-
-    /* Additional corner decorations */
-    .card-content::before,
-    .card-content::after {
-        content: '✦';
-        position: absolute;
-        font-size: 2rem;
-        color: var(--caerus-bright);
-        text-shadow: 0 0 20px var(--caerus-glow);
-        animation: candleFlicker 3s ease-in-out infinite;
-        animation-delay: 1.5s;
-        z-index: 10;
-    }
-
-    .card-content::before {
-        top: 15px;
-        right: 15px;
-    }
-
-    .card-content::after {
-        bottom: 15px;
-        left: 15px;
-    }
-
-    /* Illuminated manuscript style for cards */
-    .card-title::first-letter {
-        font-size: 3rem;
-        color: var(--caerus-bright);
-        float: left;
-        line-height: 0.8;
-        margin-right: 10px;
-        margin-top: 5px;
-        text-shadow: 0 0 20px var(--caerus-glow);
+            0 6px 20px rgba(74, 125, 199, 0.4),
+            inset 0 0 30px rgba(74, 125, 199, 0.08);
     }
 
     /* ================================
-       VOLUME GRID - GRIMOIRE PAGES
+       VOLUME GRID OPTIMIZATION
        ================================ */
-
+    
     .volume-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-        gap: 30px;
-        margin: 40px 0;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 35px;
     }
 
     .volume-card {
-        background: 
-            linear-gradient(135deg, 
-                rgba(26, 35, 50, 0.9), 
-                rgba(42, 63, 95, 0.8));
-        border: 3px solid var(--thoth-bright);
-        border-radius: 20px;
-        padding: 35px;
-        text-align: center;
         transition: all 0.4s ease;
-        position: relative;
-        overflow: hidden;
-        min-height: 320px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-
-    /* Parchment texture overlay */
-    .volume-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-image: 
-            repeating-linear-gradient(
-                0deg,
-                rgba(255, 255, 255, 0.03) 0px,
-                transparent 1px,
-                transparent 2px,
-                rgba(255, 255, 255, 0.03) 3px
-            );
-        pointer-events: none;
-        opacity: 0.5;
     }
 
     .volume-card:hover {
-        transform: translateY(-10px) scale(1.02);
-        box-shadow: 
-            0 15px 40px rgba(74, 125, 199, 0.6),
-            0 0 80px rgba(255, 215, 0, 0.4),
-            inset 0 0 40px rgba(74, 125, 199, 0.2);
-        border-color: var(--caerus-bright);
-    }
-
-    .volume-number {
-        font-size: 4rem;
-        margin-bottom: 20px;
-    }
-
-    .volume-title {
-        font-size: 2rem;
-        margin-bottom: 20px;
-    }
-
-    .volume-description {
-        font-size: 1.1rem;
-        line-height: 1.8;
+        transform: translateY(-8px);
+        box-shadow: 0 10px 35px rgba(74, 125, 199, 0.5);
     }
 
     /* ================================
-       TWO-COLUMN CONTENT LAYOUTS
+       NAVIGATION SPACING
        ================================ */
-
-    /* For pages with lots of text, use two columns */
-    .grimoire-text-columns {
-        column-count: 2;
-        column-gap: 40px;
-        column-rule: 2px solid var(--thoth-bright);
-        text-align: justify;
-        hyphens: auto;
-    }
-
-    .grimoire-text-columns h3 {
-        column-span: all;
-        text-align: center;
-        margin: 30px 0 20px 0;
-    }
-
-    /* ================================
-       SIDEBAR WIDGETS
-       ================================ */
-
-    .sidebar-widget {
-        background: linear-gradient(135deg, 
-            rgba(26, 35, 50, 0.8), 
-            rgba(42, 63, 95, 0.6));
-        border: 2px solid var(--thoth-bright);
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 25px;
-        box-shadow: 
-            0 4px 15px rgba(74, 125, 199, 0.3),
-            inset 0 0 20px rgba(74, 125, 199, 0.05);
-    }
-
-    .sidebar-widget-title {
-        font-family: 'Cinzel Decorative', serif;
-        font-size: 1.2rem;
-        color: var(--caerus-bright);
-        margin-bottom: 15px;
-        text-align: center;
-        text-shadow: 0 0 10px var(--caerus-glow);
-    }
-
-    .sidebar-widget-content {
-        color: var(--maat-bright);
-        font-size: 0.9rem;
-        line-height: 1.6;
-    }
-
-    /* Quick stats widget */
-    .quick-stat {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid rgba(74, 125, 199, 0.2);
-    }
-
-    .quick-stat:last-child {
-        border-bottom: none;
-    }
-
-    .quick-stat-label {
-        color: var(--maat-silver);
-        font-size: 0.85rem;
-    }
-
-    .quick-stat-value {
-        color: var(--caerus-bright);
-        font-weight: bold;
-    }
-
-    /* ================================
-       ENHANCED PROFILE LAYOUT
-       ================================ */
-
-    .virtue-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
+    
+    nav ul {
         gap: 25px;
     }
 
-    .virtue-card {
-        min-height: 400px;
-    }
-
-    .specialization-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 25px;
+    nav a {
+        padding: 8px 15px;
     }
 
     /* ================================
-       ACHIEVEMENT GALLERY
+       CUSTOM SCROLLBAR (SUBTLE)
        ================================ */
-
-    .achievement-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 25px;
-    }
-
-    .achievement-card {
-        min-height: 300px;
-        padding: 25px;
-    }
-
-    .achievement-card:hover:not(.locked) {
-        transform: translateY(-8px) scale(1.05);
-        box-shadow: 
-            0 12px 35px rgba(74, 125, 199, 0.6),
-            0 0 40px rgba(255, 215, 0, 0.5);
-    }
-
-    /* ================================
-       WORKING LOGGER LAYOUT
-       ================================ */
-
-    .logger-container {
-        max-width: 1400px;
-    }
-
-    .form-section {
-        padding: 40px;
-        margin-bottom: 30px;
-        border: 3px solid var(--thoth-medium);
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 25px;
-    }
-
-    /* ================================
-       QUEST LOG LAYOUT
-       ================================ */
-
-    .quest-tabs {
-        gap: 15px;
-    }
-
-    .tab-button {
-        padding: 15px 30px;
-        font-size: 1.1rem;
-    }
-
-    .quest-list {
-        display: grid;
-        gap: 20px;
-    }
-
-    .quest-item {
-        padding: 25px;
-        border: 2px solid var(--thoth-medium);
-    }
-
-    /* ================================
-       SCROLLBAR STYLING
-       ================================ */
-
+    
     ::-webkit-scrollbar {
-        width: 12px;
+        width: 10px;
     }
 
     ::-webkit-scrollbar-track {
-        background: linear-gradient(to bottom, 
-            rgba(26, 35, 50, 0.5), 
-            rgba(42, 63, 95, 0.3));
-        border-radius: 10px;
+        background: rgba(26, 35, 50, 0.3);
+        border-radius: 5px;
     }
 
     ::-webkit-scrollbar-thumb {
         background: linear-gradient(to bottom, 
-            var(--thoth-bright), 
-            var(--caerus-bright));
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            var(--thoth-medium), 
+            var(--caerus-medium));
+        border-radius: 5px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
         background: linear-gradient(to bottom, 
-            var(--thoth-glow), 
-            var(--caerus-glow));
+            var(--thoth-bright), 
+            var(--caerus-bright));
     }
 
     /* ================================
-       HOVER EFFECTS & INTERACTIONS
+       BUTTON ENHANCEMENTS
        ================================ */
-
-    .btn {
-        padding: 12px 30px;
-        font-size: 1.1rem;
-        transition: all 0.4s ease;
+    
+    .btn, button {
+        transition: all 0.3s ease;
     }
 
-    .btn:hover {
-        transform: translateY(-3px) scale(1.05);
-        box-shadow: 
-            0 8px 30px rgba(255, 215, 0, 0.6),
-            0 0 40px rgba(255, 215, 0, 0.4);
+    .btn:hover, button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
     }
 
     /* ================================
-       PAGE-SPECIFIC LAYOUTS
+       WIDER CONTENT FOR LARGE SCREENS
        ================================ */
-
-    /* Index page - featured sections */
-    .index-featured {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 30px;
-        margin: 40px 0;
-    }
-
-    /* Profile page - comprehensive layout */
-    .profile-overview {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 30px;
-        margin-bottom: 40px;
-    }
-
-    /* ================================
-       PRINT STYLES
-       ================================ */
-
-    @media print {
+    
+    @media (min-width: 1600px) {
         .container {
-            grid-template-columns: 1fr;
-            grid-template-areas:
-                "header"
-                "nav"
-                "main"
-                "footer";
-        }
-
-        .sidebar-left,
-        .sidebar-right {
-            display: none;
-        }
-
-        .card::before,
-        .card::after,
-        .card-content::before,
-        .card-content::after {
-            display: none;
+            max-width: 1600px;
         }
     }
 
-    /* ================================
-       LOADING ANIMATIONS
-       ================================ */
-
-    @keyframes pageFlip {
-        0% {
-            transform: perspective(1000px) rotateY(-10deg);
-            opacity: 0;
+    @media (min-width: 1920px) {
+        .container {
+            max-width: 1800px;
         }
-        100% {
-            transform: perspective(1000px) rotateY(0deg);
-            opacity: 1;
-        }
-    }
-
-    main {
-        animation: pageFlip 0.8s ease-out;
-    }
-
-    /* ================================
-       SPECIAL EFFECTS
-       ================================ */
-
-    /* Glowing text for important elements */
-    .mystical-glow {
-        text-shadow: 
-            0 0 10px var(--caerus-glow),
-            0 0 20px var(--thoth-bright),
-            0 0 30px var(--caerus-bright);
-        animation: pulseGlow 3s ease-in-out infinite;
-    }
-
-    @keyframes pulseGlow {
-        0%, 100% {
-            text-shadow: 
-                0 0 10px var(--caerus-glow),
-                0 0 20px var(--thoth-bright);
-        }
-        50% {
-            text-shadow: 
-                0 0 20px var(--caerus-glow),
-                0 0 30px var(--thoth-bright),
-                0 0 40px var(--caerus-bright);
-        }
-    }
-
-    /* Floating particles effect */
-    @keyframes float {
-        0%, 100% { 
-            transform: translateY(0px); 
-        }
-        50% { 
-            transform: translateY(-15px); 
-        }
-    }
-
-    /* Page corner decorations */
-    body::after {
-        content: '';
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        width: 60px;
-        height: 60px;
-        border-top: 3px solid var(--caerus-bright);
-        border-left: 3px solid var(--caerus-bright);
-        border-radius: 5px;
-        pointer-events: none;
-        z-index: 10000;
-        box-shadow: 
-            0 0 20px rgba(255, 215, 0, 0.5),
-            inset 0 0 10px rgba(255, 215, 0, 0.3);
     }
 
 } /* End of desktop media query */
 
 /* ================================
-   WIDE SCREEN OPTIMIZATIONS (1600px+)
+   THAT'S IT - NO OTHER CHANGES
    ================================ */
-
-@media (min-width: 1600px) {
-    .container {
-        grid-template-columns: 320px 1fr 320px;
-        max-width: 2000px;
-    }
-
-    .volume-grid {
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    }
-
-    .achievement-grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    }
-
-    .grimoire-text-columns {
-        column-count: 3;
-    }
-}
-
-/* ================================
-   ULTRA-WIDE SCREEN (1920px+)
-   ================================ */
-
-@media (min-width: 1920px) {
-    .container {
-        grid-template-columns: 360px 1fr 360px;
-    }
-
-    .card {
-        padding: 50px;
-    }
-
-    main {
-        padding: 0 40px;
-    }
-}
