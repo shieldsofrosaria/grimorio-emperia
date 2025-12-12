@@ -305,7 +305,12 @@
                 <li><a href="profile.html">Profile</a></li>
                 <li><a href="quests.html">Quests</a></li>
                 <li><a href="achievements.html">Achievements</a></li>
-                <li><a href="logger.html">Working Logger</a></li>
+                <li><a href="logger.html">Logger</a></li>
+                <li><a href="volumes/volume1.html">Volume I</a></li>
+                <li><a href="volumes/volume2.html">Volume II</a></li>
+                <li><a href="volumes/volume3.html">Volume III</a></li>
+                <li><a href="volumes/volume4.html">Volume IV</a></li>
+                <li><a href="volumes/volume5.html">Volume V</a></li>
             </ul>
         </nav>
 
@@ -696,6 +701,32 @@
         </footer>
     </div>
 
+    <script>
+// Tab switching functionality
+function switchTab(tabName) {
+    // Hide all panels
+    const panels = document.querySelectorAll('.quest-panel');
+    panels.forEach(panel => panel.classList.remove('active'));
+    
+    // Remove active from all buttons
+    const buttons = document.querySelectorAll('.tab-button');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    // Show selected panel
+    const selectedPanel = document.getElementById(tabName + '-quests');
+    if (selectedPanel) {
+        selectedPanel.classList.add('active');
+    }
+    
+    // Highlight selected button
+    event.target.classList.add('active');
+}
+
+// Show daily quests by default on page load
+window.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('daily-quests').classList.add('active');
+});
+    </script>
     <script src="js/quests.js"></script>
 </body>
 </html>
