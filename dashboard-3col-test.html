@@ -326,8 +326,8 @@
             z-index: 1;
             display: flex;
             flex-direction: row;
-            align-items: stretch;
-            min-height: calc(100vh - 80px);
+            align-items: flex-start;
+            min-height: auto;
         }
 
         /* 3-Column Layout */
@@ -340,6 +340,15 @@
             flex-shrink: 0;
             box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
             position: relative;
+            max-height: calc(100vh - 80px);
+            position: sticky;
+            top: 80px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            display: none;
         }
 
         .sidebar-nav::before {
@@ -438,9 +447,9 @@
         .main-content-area {
             flex: 1;
             padding: 30px;
-            overflow-y: auto;
             background: linear-gradient(135deg, rgba(10, 5, 20, 0.4), rgba(26, 15, 46, 0.4));
             min-width: 0;
+            min-height: auto;
         }
 
         .profile-sidebar {
@@ -448,10 +457,19 @@
             background: linear-gradient(180deg, rgba(45, 27, 78, 0.98), rgba(74, 44, 109, 0.95));
             border-left: 2px solid var(--mystic-glow);
             padding: 20px;
-            overflow-y: auto;
             flex-shrink: 0;
             box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
             position: relative;
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            position: sticky;
+            top: 80px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .profile-sidebar::-webkit-scrollbar {
+            display: none;
         }
 
         .profile-sidebar::before {
@@ -2916,13 +2934,83 @@
                 padding: 10px 15px;
             }
         }
+
+        /* Quest Card Styles */
+        .quest-card {
+            background: linear-gradient(135deg, rgba(45, 27, 78, 0.6), rgba(74, 44, 109, 0.4));
+            border: 2px solid var(--mystic-glow);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+
+        .quest-card:hover {
+            border-color: var(--caerus-gold);
+            box-shadow: 0 0 20px rgba(218, 165, 32, 0.3);
+            transform: translateX(5px);
+        }
+
+        .quest-card.completed {
+            background: linear-gradient(135deg, rgba(26, 65, 40, 0.5), rgba(45, 90, 60, 0.3));
+            border-color: var(--maat-silver);
+            opacity: 0.7;
+        }
+
+        .quest-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: var(--caerus-gold);
+            flex-shrink: 0;
+        }
+
+        .quest-card-content {
+            flex: 1;
+        }
+
+        .quest-card-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            color: var(--caerus-gold);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .quest-card-description {
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .quest-card-reward {
+            display: flex;
+            gap: 15px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .quest-card-reward-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quest-card.completed .quest-card-title {
+            color: var(--maat-silver);
+            text-decoration: line-through;
+        }
     </style>
 </head>
 <body>
     <!-- Top Navigation -->
     <nav class="top-nav">
         <div class="nav-container">
-            <div class="nav-brand">
+            <div class="nav-brand" onclick="switchView('overview')" style="cursor: pointer;">
                 <span class="nav-icon">🎓</span>
                 <span class="nav-title">Empirical Academy (3-Col Test)</span>
             </div>
@@ -2930,9 +3018,6 @@
             <div style="flex: 1;"></div>
 
             <div class="nav-actions">
-                <button class="nav-btn edit-btn" onclick="openProfileModal()">
-                    ✏️ Edit
-                </button>
                 <button class="nav-btn sync-btn" id="navSyncBtn" onclick="openSyncModal()">
                     <span id="navSyncIcon">☁️</span>
                     <span id="navSyncText">Sync</span>
@@ -3069,6 +3154,451 @@
                         <p style="text-align: center; font-size: 1.1rem; line-height: 1.8;">
                             <em>"The path of wisdom begins with a single step. Complete your daily quests to strengthen your practice and deepen your understanding of the Three Virtues."</em>
                         </p>
+                    </div>
+                </div>
+
+                <!-- Daily Quests Content -->
+                <div id="content-daily-quests" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        📅 Daily Quests
+                    </h1>
+                    
+                    <!-- Daily Progress Bar -->
+                    <div style="background: linear-gradient(135deg, rgba(45, 27, 78, 0.8), rgba(74, 44, 109, 0.6)); border: 2px solid var(--caerus-gold); border-radius: 15px; padding: 25px; margin-bottom: 30px; text-align: center;">
+                        <h2 style="font-family: 'Cinzel', serif; color: var(--caerus-gold); margin-bottom: 15px;">Today's Progress</h2>
+                        <div style="margin-bottom: 15px;">
+                            <span id="dailyQuestCount" style="font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--text-primary);">0 / 3</span>
+                            <span style="color: var(--text-secondary); margin-left: 10px;">Quests Completed</span>
+                        </div>
+                        <div style="background: rgba(0, 0, 0, 0.3); border-radius: 10px; height: 24px; overflow: hidden; border: 2px solid var(--mystic-purple);">
+                            <div id="dailyProgressBar" style="height: 100%; background: linear-gradient(90deg, var(--caerus-gold), var(--gold-glow)); width: 0%; transition: width 0.5s ease; border-radius: 8px;"></div>
+                        </div>
+                        <p id="dailyRewardText" style="margin-top: 15px; color: var(--text-secondary); font-size: 0.95rem;">Complete all quests for a 5 point bonus to Ma'at!</p>
+                    </div>
+
+                    <!-- Daily Quests -->
+                    <div id="dailyQuestsList" style="display: flex; flex-direction: column; gap: 15px;">
+                        <!-- Quests will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Volume 1 Content -->
+                <div id="content-volume-1" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 20px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        📖 Volume I: The Three Virtues
+                    </h1>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(26, 15, 46, 0.8), rgba(45, 27, 78, 0.6)); border: 2px solid var(--mystic-purple); border-radius: 15px; padding: 30px; margin-bottom: 30px;">
+                        <h2 style="font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--thoth-blue); margin-bottom: 20px; text-align: center;">🌙 Thoth - Wisdom Through Study</h2>
+                        <p style="line-height: 1.8; margin-bottom: 15px;">
+                            <strong>Thoth</strong> represents the accumulation of knowledge through careful observation and study. Named for the Egyptian god of wisdom and writing, this virtue emphasizes the empirical approach to understanding natural law.
+                        </p>
+                        <p style="line-height: 1.8; margin-bottom: 15px;">
+                            To strengthen Thoth, engage in:
+                        </p>
+                        <ul style="line-height: 1.8; margin-left: 20px;">
+                            <li>Reading grimoires and natural philosophy texts</li>
+                            <li>Documenting observations in your journal</li>
+                            <li>Studying correspondences between herbs, planets, and timing</li>
+                            <li>Learning the properties of materials through experimentation</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(26, 15, 46, 0.8), rgba(45, 27, 78, 0.6)); border: 2px solid var(--maat-silver); border-radius: 15px; padding: 30px; margin-bottom: 30px;">
+                        <h2 style="font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--maat-silver); margin-bottom: 20px; text-align: center;">⚖️ Ma'at - Balance and Ethics</h2>
+                        <p style="line-height: 1.8; margin-bottom: 15px;">
+                            <strong>Ma'at</strong> embodies cosmic order, truth, and ethical practice. This virtue ensures that magical work serves protection, healing, and harmony rather than manipulation or harm.
+                        </p>
+                        <p style="line-height: 1.8; margin-bottom: 15px;">
+                            To strengthen Ma'at, practice:
+                        </p>
+                        <ul style="line-height: 1.8; margin-left: 20px;">
+                            <li>Cleansing rituals to maintain spiritual hygiene</li>
+                            <li>Protective workings for yourself and loved ones</li>
+                            <li>Balancing practices when feeling spiritually heavy</li>
+                            <li>Ethical consideration before any working</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(26, 15, 46, 0.8), rgba(45, 27, 78, 0.6)); border: 2px solid var(--caerus-gold); border-radius: 15px; padding: 30px;">
+                        <h2 style="font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--caerus-gold); margin-bottom: 20px; text-align: center;">⚡ Caerus - Perfect Timing</h2>
+                        <p style="line-height: 1.8; margin-bottom: 15px;">
+                            <strong>Caerus</strong> represents the opportune moment—understanding when conditions align for successful workings. This includes lunar phases, planetary hours, and seasonal timing.
+                        </p>
+                        <p style="line-height: 1.8; margin-bottom: 15px;">
+                            To strengthen Caerus, develop:
+                        </p>
+                        <ul style="line-height: 1.8; margin-left: 20px;">
+                            <li>Awareness of moon phases and their magical applications</li>
+                            <li>Knowledge of planetary hours and days</li>
+                            <li>Recognition of personal energy cycles</li>
+                            <li>Patience to wait for the right moment</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Weekly Quests Content -->
+                <div id="content-weekly-quests" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        📆 Weekly Quests
+                    </h1>
+                    
+                    <!-- Weekly Progress Bar -->
+                    <div style="background: linear-gradient(135deg, rgba(45, 27, 78, 0.8), rgba(74, 44, 109, 0.6)); border: 2px solid var(--thoth-blue); border-radius: 15px; padding: 25px; margin-bottom: 30px; text-align: center;">
+                        <h2 style="font-family: 'Cinzel', serif; color: var(--thoth-blue); margin-bottom: 15px;">Weekly Progress</h2>
+                        <div style="margin-bottom: 15px;">
+                            <span id="weeklyQuestCount" style="font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--text-primary);">0 / 3</span>
+                            <span style="color: var(--text-secondary); margin-left: 10px;">Quests Completed</span>
+                        </div>
+                        <div style="background: rgba(0, 0, 0, 0.3); border-radius: 10px; height: 24px; overflow: hidden; border: 2px solid var(--mystic-purple);">
+                            <div id="weeklyProgressBar" style="height: 100%; background: linear-gradient(90deg, var(--thoth-blue), var(--arcane-blue)); width: 0%; transition: width 0.5s ease; border-radius: 8px;"></div>
+                        </div>
+                        <p id="weeklyRewardText" style="margin-top: 15px; color: var(--text-secondary); font-size: 0.95rem;">Complete all quests for a 10 point bonus to Thoth!</p>
+                    </div>
+
+                    <!-- Weekly Quests -->
+                    <div id="weeklyQuestsList" style="display: flex; flex-direction: column; gap: 15px;">
+                        <!-- Quests will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Monthly Quests Content -->
+                <div id="content-monthly-quests" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        📊 Monthly Quests
+                    </h1>
+                    
+                    <!-- Monthly Progress Bar -->
+                    <div style="background: linear-gradient(135deg, rgba(45, 27, 78, 0.8), rgba(74, 44, 109, 0.6)); border: 2px solid var(--maat-silver); border-radius: 15px; padding: 25px; margin-bottom: 30px; text-align: center;">
+                        <h2 style="font-family: 'Cinzel', serif; color: var(--maat-silver); margin-bottom: 15px;">Monthly Progress</h2>
+                        <div style="margin-bottom: 15px;">
+                            <span id="monthlyQuestCount" style="font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--text-primary);">0 / 3</span>
+                            <span style="color: var(--text-secondary); margin-left: 10px;">Quests Completed</span>
+                        </div>
+                        <div style="background: rgba(0, 0, 0, 0.3); border-radius: 10px; height: 24px; overflow: hidden; border: 2px solid var(--mystic-purple);">
+                            <div id="monthlyProgressBar" style="height: 100%; background: linear-gradient(90deg, var(--maat-silver), rgba(192, 208, 232, 0.8)); width: 0%; transition: width 0.5s ease; border-radius: 8px;"></div>
+                        </div>
+                        <p id="monthlyRewardText" style="margin-top: 15px; color: var(--text-secondary); font-size: 0.95rem;">Complete all quests for a 20 point bonus to Caerus!</p>
+                    </div>
+
+                    <!-- Monthly Quests -->
+                    <div id="monthlyQuestsList" style="display: flex; flex-direction: column; gap: 15px;">
+                        <!-- Quests will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Volume II Content -->
+                <div id="content-volume-2" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        📖 Volume II: Daily Workings
+                    </h1>
+                    <p style="text-align: center; margin-bottom: 30px; color: var(--text-primary); font-size: 1.1rem; font-style: italic;">
+                        "Small practices, performed with intention and consistency, compound into significant transformation."
+                    </p>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(26, 15, 46, 0.8), rgba(45, 27, 78, 0.6)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 30px;">
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--thoth-blue); margin-bottom: 15px;">Morning Practices</h3>
+                        <ul style="line-height: 1.8; margin-left: 20px;">
+                            <li><strong>Candle Lighting:</strong> Light a candle and state your intention for the day</li>
+                            <li><strong>Herbal Tea Ritual:</strong> Brew and consume a tea aligned with your needs</li>
+                            <li><strong>Grounding:</strong> Place hands on earth and center yourself</li>
+                        </ul>
+                        
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--maat-silver); margin-top: 20px; margin-bottom: 15px;">Evening Practices</h3>
+                        <ul style="line-height: 1.8; margin-left: 20px;">
+                            <li><strong>Journal Entry:</strong> Record the day's observations and workings</li>
+                            <li><strong>Reflection:</strong> Review how your practice manifested</li>
+                            <li><strong>Gratitude Ritual:</strong> Thank the forces that supported you</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Volume III Content -->
+                <div id="content-volume-3" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        📖 Volume III: Scroll Workings
+                    </h1>
+                    <p style="text-align: center; margin-bottom: 30px; color: var(--text-primary); font-size: 1.1rem; font-style: italic;">
+                        "Intention written is intention crystallized. The written word carries power."
+                    </p>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(26, 15, 46, 0.8), rgba(45, 27, 78, 0.6)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 30px;">
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--caerus-gold); margin-bottom: 15px;">✍️ Protection Scroll</h3>
+                        <p style="line-height: 1.8; margin-bottom: 15px;">Write your intention for protection on parchment. Inscribe protective symbols. Carry or burn according to need.</p>
+                        
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--caerus-gold); margin-top: 20px; margin-bottom: 15px;">✍️ Prosperity Scroll</h3>
+                        <p style="line-height: 1.8; margin-bottom: 15px;">Write what prosperity means to you. Draw symbols of wealth and abundance. Place under pillow or in workspace.</p>
+                        
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--caerus-gold); margin-top: 20px; margin-bottom: 15px;">✍️ Healing Scroll</h3>
+                        <p style="line-height: 1.8;">Write intentions for healing. Infuse with herbs. Present to intended recipient or yourself.</p>
+                    </div>
+                </div>
+
+                <!-- Volume IV Content -->
+                <div id="content-volume-4" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        📖 Volume IV: Lunar Practice
+                    </h1>
+                    <p style="text-align: center; margin-bottom: 30px; color: var(--text-primary); font-size: 1.1rem; font-style: italic;">
+                        "The Moon cycles through all phases within one month. So too does a practitioner's year."
+                    </p>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(26, 15, 46, 0.8), rgba(45, 27, 78, 0.6)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 30px;">
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--thoth-blue); margin-bottom: 15px;">🌑 New Moon (Manifestation)</h3>
+                        <p style="line-height: 1.8; margin-bottom: 15px;">Plant seeds of intention. Begin new projects. Set goals for the lunar month ahead.</p>
+                        
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--maat-silver); margin-top: 20px; margin-bottom: 15px;">🌒 Waxing Moon (Growth)</h3>
+                        <p style="line-height: 1.8; margin-bottom: 15px;">Perform workings that increase and attract. Build momentum. Study and learn.</p>
+                        
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--caerus-gold); margin-top: 20px; margin-bottom: 15px;">🌕 Full Moon (Power & Culmination)</h3>
+                        <p style="line-height: 1.8; margin-bottom: 15px;">Peak energy for all workings. Gratitude rituals. Celebration of achievements. Release what no longer serves.</p>
+                        
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--caerus-gold); margin-top: 20px; margin-bottom: 15px;">🌘 Waning Moon (Banishing)</h3>
+                        <p style="line-height: 1.8;">Release negative patterns. Perform cleansings. Banish obstacles. Rest and reflect.</p>
+                    </div>
+                </div>
+
+                <!-- Volume V Content -->
+                <div id="content-volume-5" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        📖 Volume V: Reference & Study
+                    </h1>
+                    <p style="text-align: center; margin-bottom: 30px; color: var(--text-primary); font-size: 1.1rem; font-style: italic;">
+                        "Knowledge is the foundation of all practice. Build your library of correspondences."
+                    </p>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(26, 15, 46, 0.8), rgba(45, 27, 78, 0.6)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 30px; margin-bottom: 20px;">
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--thoth-blue); margin-bottom: 15px;">🌿 Herbal Correspondences</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="border-bottom: 1px solid rgba(139, 111, 216, 0.3);">
+                                <td style="padding: 10px;"><strong>Rosemary</strong></td>
+                                <td style="padding: 10px;">Protection, memory, purification</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(139, 111, 216, 0.3);">
+                                <td style="padding: 10px;"><strong>Lavender</strong></td>
+                                <td style="padding: 10px;">Calm, healing, protection</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(139, 111, 216, 0.3);">
+                                <td style="padding: 10px;"><strong>Sage</strong></td>
+                                <td style="padding: 10px;">Cleansing, wisdom, clearing</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px;"><strong>Mint</strong></td>
+                                <td style="padding: 10px;">Prosperity, mental clarity, freshness</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(26, 15, 46, 0.8), rgba(45, 27, 78, 0.6)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 30px;">
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--maat-silver); margin-bottom: 15px;">🪐 Planetary Days</h3>
+                        <ul style="line-height: 1.8; margin-left: 20px;">
+                            <li><strong>Monday (Moon):</strong> Emotions, intuition, travel</li>
+                            <li><strong>Tuesday (Mars):</strong> Courage, conflict, protection</li>
+                            <li><strong>Wednesday (Mercury):</strong> Communication, intellect, commerce</li>
+                            <li><strong>Thursday (Jupiter):</strong> Prosperity, expansion, wisdom</li>
+                            <li><strong>Friday (Venus):</strong> Love, harmony, beauty</li>
+                            <li><strong>Saturday (Saturn):</strong> Discipline, boundaries, time</li>
+                            <li><strong>Sunday (Sun):</strong> Success, vitality, wholeness</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Moon Tracker Content -->
+                <div id="content-moon-tracker" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        🌙 Moon Phase Tracker
+                    </h1>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(139, 111, 216, 0.2), rgba(218, 165, 32, 0.2)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 30px; text-align: center; margin-bottom: 30px;">
+                        <div style="font-size: 4rem; margin-bottom: 15px;">🌕</div>
+                        <h2 style="font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--caerus-gold); margin-bottom: 10px;">Waxing Moon</h2>
+                        <p style="font-size: 1.1rem; margin-bottom: 15px;">Day 8 of 14 until Full Moon</p>
+                        <p style="font-style: italic; color: var(--text-primary);">Energy: Growth, manifestation, building</p>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, rgba(26, 15, 46, 0.8), rgba(45, 27, 78, 0.6)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 20px; margin-bottom: 20px;">
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--caerus-gold); margin-bottom: 15px;">✓ Recommended Workings</h3>
+                        <ul style="line-height: 1.8; margin-left: 20px;">
+                            <li>Attraction and manifestation spells</li>
+                            <li>Prosperity and success workings</li>
+                            <li>Learning and study</li>
+                            <li>Healing practices</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, rgba(26, 15, 46, 0.8), rgba(45, 27, 78, 0.6)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 20px;">
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--caerus-gold); margin-bottom: 15px;">✗ Avoid During Waxing Moon</h3>
+                        <ul style="line-height: 1.8; margin-left: 20px;">
+                            <li>Banishing or clearing work</li>
+                            <li>Endings or release rituals</li>
+                            <li>Binding or restriction spells</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Toolkit Content -->
+                <div id="content-toolkit" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        🛠️ Toolkit
+                    </h1>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(139, 111, 216, 0.2), rgba(218, 165, 32, 0.2)); border: 2px solid var(--mystic-glow); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--caerus-gold); margin-bottom: 15px;">📊 Quick Stats</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <p style="color: var(--maat-silver); font-weight: bold;">Current Streak</p>
+                                <p style="font-size: 1.5rem; color: var(--caerus-gold);">0 days</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--maat-silver); font-weight: bold;">Total Workings</p>
+                                <p style="font-size: 1.5rem; color: var(--caerus-gold);">0</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--maat-silver); font-weight: bold;">Longest Streak</p>
+                                <p style="font-size: 1.5rem; color: var(--caerus-gold);">0 days</p>
+                            </div>
+                            <div>
+                                <p style="color: var(--maat-silver); font-weight: bold;">Practice Level</p>
+                                <p style="font-size: 1.5rem; color: var(--caerus-gold);">1</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, rgba(139, 111, 216, 0.2), rgba(218, 165, 32, 0.2)); border: 2px solid var(--mystic-glow); border-radius: 12px; padding: 20px;">
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--caerus-gold); margin-bottom: 15px;">🎯 Tools & Resources</h3>
+                        <button style="display: block; width: 100%; padding: 12px; margin-bottom: 10px; background: linear-gradient(135deg, var(--mystic-purple), rgba(139, 111, 216, 0.3)); border: 2px solid var(--mystic-glow); color: var(--maat-silver); cursor: pointer; border-radius: 8px; font-family: 'Cinzel', serif; font-size: 1rem;">
+                            📝 Start New Working Log
+                        </button>
+                        <button style="display: block; width: 100%; padding: 12px; margin-bottom: 10px; background: linear-gradient(135deg, var(--mystic-purple), rgba(139, 111, 216, 0.3)); border: 2px solid var(--mystic-glow); color: var(--maat-silver); cursor: pointer; border-radius: 8px; font-family: 'Cinzel', serif; font-size: 1rem;">
+                            📊 View Statistics
+                        </button>
+                        <button style="display: block; width: 100%; padding: 12px; background: linear-gradient(135deg, var(--mystic-purple), rgba(139, 111, 216, 0.3)); border: 2px solid var(--mystic-glow); color: var(--maat-silver); cursor: pointer; border-radius: 8px; font-family: 'Cinzel', serif; font-size: 1rem;">
+                            ⚙️ Settings
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Character Info Content -->
+                <div id="content-character-info" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        📋 Character Information
+                    </h1>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(139, 111, 216, 0.2), rgba(218, 165, 32, 0.2)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 30px; margin-bottom: 30px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <p style="color: var(--caerus-gold); font-weight: bold; margin-bottom: 5px;">Scribe Name</p>
+                                <input type="text" placeholder="Your scribe name" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 2px solid var(--mystic-glow); color: var(--text-primary); border-radius: 8px; font-family: 'Cormorant Garamond', serif;">
+                            </div>
+                            <div>
+                                <p style="color: var(--caerus-gold); font-weight: bold; margin-bottom: 5px;">Initiation Date</p>
+                                <input type="date" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 2px solid var(--mystic-glow); color: var(--text-primary); border-radius: 8px; font-family: 'Cormorant Garamond', serif;">
+                            </div>
+                            <div>
+                                <p style="color: var(--caerus-gold); font-weight: bold; margin-bottom: 5px;">Specialization</p>
+                                <select style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 2px solid var(--mystic-glow); color: var(--text-primary); border-radius: 8px; font-family: 'Cormorant Garamond', serif;">
+                                    <option>Select a specialization</option>
+                                    <option>Herbalist</option>
+                                    <option>Astrologer</option>
+                                    <option>Alchemist</option>
+                                    <option>Guardian</option>
+                                    <option>Scholar</option>
+                                    <option>Polyglot</option>
+                                </select>
+                            </div>
+                            <div>
+                                <p style="color: var(--caerus-gold); font-weight: bold; margin-bottom: 5px;">Tradition</p>
+                                <input type="text" placeholder="Your tradition or path" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 2px solid var(--mystic-glow); color: var(--text-primary); border-radius: 8px; font-family: 'Cormorant Garamond', serif;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(139, 111, 216, 0.2), rgba(218, 165, 32, 0.2)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 30px;">
+                        <p style="color: var(--caerus-gold); font-weight: bold; margin-bottom: 10px;">Personal Notes</p>
+                        <textarea placeholder="Add personal notes about your path..." style="width: 100%; padding: 15px; background: rgba(0,0,0,0.3); border: 2px solid var(--mystic-glow); color: var(--text-primary); border-radius: 8px; font-family: 'Cormorant Garamond', serif; min-height: 150px; resize: vertical;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Journal Content -->
+                <div id="content-journal" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        📓 Grimoire Journal
+                    </h1>
+                    <p style="text-align: center; margin-bottom: 30px; color: var(--text-primary); font-style: italic;">
+                        Record your workings, observations, and insights here.
+                    </p>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <button style="flex: 1; padding: 12px; background: linear-gradient(135deg, var(--mystic-purple), rgba(139, 111, 216, 0.3)); border: 2px solid var(--mystic-glow); color: var(--maat-silver); cursor: pointer; border-radius: 8px; font-family: 'Cinzel', serif; font-size: 1rem;">
+                            + New Entry
+                        </button>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(139, 111, 216, 0.2), rgba(218, 165, 32, 0.2)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 20px; text-align: center;">
+                        <p style="color: var(--text-primary); font-style: italic;">No journal entries yet. Start your first entry to begin recording your practice.</p>
+                    </div>
+                </div>
+
+                <!-- Notes Content -->
+                <div id="content-notes" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        📝 Personal Notes
+                    </h1>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <button style="flex: 1; padding: 12px; background: linear-gradient(135deg, var(--mystic-purple), rgba(139, 111, 216, 0.3)); border: 2px solid var(--mystic-glow); color: var(--maat-silver); cursor: pointer; border-radius: 8px; font-family: 'Cinzel', serif; font-size: 1rem;">
+                            + New Note
+                        </button>
+                    </div>
+                    
+                    <textarea placeholder="Write your notes here..." style="width: 100%; padding: 20px; background: linear-gradient(135deg, rgba(139, 111, 216, 0.2), rgba(218, 165, 32, 0.2)); border: 2px solid var(--mystic-glow); color: var(--text-primary); border-radius: 15px; font-family: 'Cormorant Garamond', serif; min-height: 400px; resize: vertical;"></textarea>
+                </div>
+
+                <!-- Progress Report Content -->
+                <div id="content-progress" class="content-view" style="display: none;">
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                        📈 Progress Report
+                    </h1>
+                    
+                    <div style="background: linear-gradient(135deg, rgba(139, 111, 216, 0.2), rgba(218, 165, 32, 0.2)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 30px; margin-bottom: 30px;">
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--caerus-gold); margin-bottom: 20px;">📊 Virtue Progress</h3>
+                        
+                        <div style="margin-bottom: 25px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="color: var(--thoth-blue); font-weight: bold;">🌙 Thoth (Wisdom)</span>
+                                <span style="color: var(--text-primary);">0 / 100</span>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.3); border-radius: 10px; height: 20px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, var(--thoth-blue), var(--arcane-glow)); height: 100%; width: 0%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 25px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="color: var(--maat-silver); font-weight: bold;">⚖️ Ma'at (Balance)</span>
+                                <span style="color: var(--text-primary);">0 / 100</span>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.3); border-radius: 10px; height: 20px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, var(--maat-silver), white); height: 100%; width: 0%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="color: var(--caerus-gold); font-weight: bold;">⚡ Caerus (Timing)</span>
+                                <span style="color: var(--text-primary);">0 / 100</span>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.3); border-radius: 10px; height: 20px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, var(--caerus-gold), var(--gold-glow)); height: 100%; width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: linear-gradient(135deg, rgba(139, 111, 216, 0.2), rgba(218, 165, 32, 0.2)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 30px;">
+                        <h3 style="font-family: 'Cinzel', serif; color: var(--caerus-gold); margin-bottom: 20px;">📅 Activity Timeline</h3>
+                        <div style="text-align: center; padding: 20px;">
+                            <p style="color: var(--text-primary); font-style: italic;">Begin your practice to see progress tracked here.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -4515,11 +5045,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
             </div> <!-- End content-activity -->
 
-
-            <!-- Modals and overlays below -->
         </div> <!-- End main-content-area -->
 
         <!-- RIGHT PROFILE SIDEBAR -->
@@ -4824,6 +5351,21 @@
         const JSONBIN_API_KEY = '$2a$10$IHpJv8M/m2qmjz8AHAJvpuBmVIJUtlPTSnAh0FRKUq1a90bDmA7Mm';
         const AUTO_SYNC_INTERVAL = 30000; // 30 seconds
 
+        // Validate configuration
+        function validateConfiguration() {
+            const issues = [];
+            
+            if (!JSONBIN_API_KEY || JSONBIN_API_KEY.includes('YOUR_') || JSONBIN_API_KEY === '') {
+                issues.push('⚠️ JSONBin API key not configured');
+            }
+            
+            if (issues.length > 0) {
+                console.warn('Configuration warnings:', issues.join(' | '));
+                return false;
+            }
+            return true;
+        }
+
         let autoSyncTimer = null;
 
         // Default profile data
@@ -4846,12 +5388,14 @@
             }
         };
 
-        // Generate device fingerprint
+        // Generate device fingerprint with better validation
         function generateDeviceId() {
             let deviceId = localStorage.getItem('deviceId');
-            if (!deviceId) {
-                deviceId = 'GE-DEV-' + Math.random().toString(36).substring(2, 15);
+            if (!deviceId || deviceId === '' || !deviceId.startsWith('GE-DEV-')) {
+                // Generate new device ID
+                deviceId = 'GE-DEV-' + Math.random().toString(36).substring(2, 15) + '-' + Date.now();
                 localStorage.setItem('deviceId', deviceId);
+                console.log('✓ New device ID generated:', deviceId);
             }
             return deviceId;
         }
@@ -4955,12 +5499,17 @@
             return Math.max(diff, 0);
         }
 
-        // Save profile
+        // Save profile with modification tracking
         function saveProfileData(profile) {
+            // Track when this profile was last modified locally
+            localStorage.setItem('lastModified', new Date().toISOString());
             localStorage.setItem('grimorioProfile', JSON.stringify(profile));
+            
+            console.log('✓ Profile saved locally');
             
             // If auto-sync is enabled, sync immediately
             if (localStorage.getItem('autoSyncEnabled') === 'true') {
+                console.log('Auto-sync enabled, syncing...');
                 syncToCloud();
             }
         }
@@ -4980,14 +5529,19 @@
             }
         }
 
-        // Sync to cloud (auto-sync)
+        // Sync to cloud (auto-sync) with improved error handling
         async function syncToCloud() {
+            if (!validateConfiguration()) {
+                console.warn('Sync aborted: Configuration invalid');
+                return;
+            }
+
             const deviceId = generateDeviceId();
             const profile = loadProfile();
             
-            showSyncStatus('Syncing...', 'syncing');
-            
             try {
+                showSyncStatus('Syncing...', 'syncing');
+                
                 const response = await fetch('https://api.jsonbin.io/v3/b', {
                     method: 'POST',
                     headers: {
@@ -4998,27 +5552,44 @@
                     body: JSON.stringify({
                         deviceId: deviceId,
                         profile: profile,
-                        updated: new Date().toISOString()
+                        updated: new Date().toISOString(),
+                        lastModified: new Date().toISOString()
                     })
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
                 const data = await response.json();
                 
-                if (data.metadata && data.metadata.id) {
+                if (data.success !== false && data.metadata && data.metadata.id) {
                     localStorage.setItem('cloudBinId', data.metadata.id);
+                    localStorage.setItem('lastSyncTime', new Date().toISOString());
                     showSyncStatus('Synced ✓', 'success');
-                    console.log('Auto-sync successful');
+                    console.log('✓ Auto-sync successful to bin:', data.metadata.id);
+                    return true;
+                } else {
+                    throw new Error(data.error || 'Invalid response from JSONbin');
                 }
             } catch (error) {
-                console.error('Auto-sync error:', error);
-                showSyncStatus('Sync failed', 'error');
+                console.error('✗ Auto-sync error:', error.message);
+                showSyncStatus(`Sync failed: ${error.message}`, 'error');
+                return false;
             }
         }
 
-        // Load from cloud (auto-sync)
+        // Load from cloud (auto-sync) with improved validation
         async function loadFromCloud() {
             const binId = localStorage.getItem('cloudBinId');
-            if (!binId) return;
+            if (!binId) {
+                console.debug('No cloud bin ID, skipping load');
+                return false;
+            }
+            
+            if (!validateConfiguration()) {
+                return false;
+            }
             
             try {
                 const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
@@ -5028,29 +5599,46 @@
                     }
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
                 const data = await response.json();
                 
                 if (data.record && data.record.profile) {
                     const cloudProfile = data.record.profile;
                     const localProfile = loadProfile();
                     
-                    // Compare timestamps to avoid overwriting newer local data
-                    const cloudTime = new Date(data.record.updated).getTime();
+                    // Get timestamps for comparison
+                    const cloudTime = new Date(data.record.updated || data.record.lastModified || 0).getTime();
                     const localTime = new Date(localStorage.getItem('lastModified') || 0).getTime();
                     
+                    // Only update if cloud is newer (avoid overwriting local changes)
                     if (cloudTime > localTime) {
                         localStorage.setItem('grimorioProfile', JSON.stringify(cloudProfile));
+                        localStorage.setItem('lastModified', data.record.updated || new Date().toISOString());
                         updateUI(cloudProfile);
-                        console.log('Profile updated from cloud');
+                        console.log('✓ Profile updated from cloud (cloud data was newer)');
+                        return true;
+                    } else {
+                        console.debug('Local profile is newer, keeping local version');
                     }
                 }
+                return false;
             } catch (error) {
-                console.error('Load from cloud error:', error);
+                console.error('✗ Load from cloud error:', error.message);
+                return false;
             }
         }
 
-        // Toggle auto-sync
+        // Toggle auto-sync with improved logging and error handling
         function toggleAutoSync() {
+            if (!validateConfiguration()) {
+                document.getElementById('autoSyncToggle').checked = false;
+                alert('⚠️ Auto-sync cannot be enabled: API key not configured');
+                return;
+            }
+
             const toggle = document.getElementById('autoSyncToggle');
             const status = document.getElementById('autoSyncStatus');
             const info = document.getElementById('autoSyncInfo');
@@ -5066,16 +5654,21 @@
                 const allSyncBtns = document.querySelectorAll('#syncModeBtn, #navSyncBtn');
                 allSyncBtns.forEach(btn => btn.classList.add('auto-sync-enabled'));
                 
-                document.getElementById('deviceId').textContent = generateDeviceId();
+                const deviceId = generateDeviceId();
+                document.getElementById('deviceId').textContent = deviceId;
                 
-                // Start auto-sync
+                // Start auto-sync immediately
+                console.log('✓ Auto-sync enabled for device:', deviceId);
                 syncToCloud();
+                
+                // Set up auto-sync intervals
+                if (autoSyncTimer) clearInterval(autoSyncTimer);
                 autoSyncTimer = setInterval(syncToCloud, AUTO_SYNC_INTERVAL);
                 
-                // Also check for updates
+                // Also check for updates periodically
                 setInterval(loadFromCloud, AUTO_SYNC_INTERVAL);
                 
-                alert('✨ Auto-sync enabled! Your profile will sync automatically across devices using the same browser account.');
+                alert('✨ Auto-sync enabled! Your profile will sync automatically every 30 seconds.');
             } else {
                 localStorage.setItem('autoSyncEnabled', 'false');
                 status.textContent = 'Disabled';
@@ -5090,6 +5683,8 @@
                     clearInterval(autoSyncTimer);
                     autoSyncTimer = null;
                 }
+                
+                console.log('✗ Auto-sync disabled');
             }
         }
 
@@ -5114,15 +5709,15 @@
             document.getElementById('xpBar').style.width = `${xpPercent}%`;
             document.getElementById('focusBar').style.width = `${profile.focus}%`;
 
-            document.getElementById('thothPoints').textContent = profile.virtues.thoth.points;
+            document.getElementById('thothPoints').textContent = `${profile.virtues.thoth.points} pts`;
             document.getElementById('thothRank').textContent = `Rank: ${profile.virtues.thoth.rank}`;
             document.getElementById('thothProgress').style.width = `${profile.virtues.thoth.progress}%`;
 
-            document.getElementById('maatPoints').textContent = profile.virtues.maat.points;
+            document.getElementById('maatPoints').textContent = `${profile.virtues.maat.points} pts`;
             document.getElementById('maatRank').textContent = `Rank: ${profile.virtues.maat.rank}`;
             document.getElementById('maatProgress').style.width = `${profile.virtues.maat.progress}%`;
 
-            document.getElementById('caerusPoints').textContent = profile.virtues.caerus.points;
+            document.getElementById('caerusPoints').textContent = `${profile.virtues.caerus.points} pts`;
             document.getElementById('caerusRank').textContent = `Rank: ${profile.virtues.caerus.rank}`;
             document.getElementById('caerusProgress').style.width = `${profile.virtues.caerus.progress}%`;
 
@@ -5304,10 +5899,19 @@
             document.getElementById('codeInput').value = '';
         }
 
-        // Generate manual sync code
+        // Generate manual sync code with better error handling
         async function generateSyncCode() {
+            if (!validateConfiguration()) {
+                alert('⚠️ Sync is not properly configured. Please check console for details.');
+                return;
+            }
+
             const profile = loadProfile();
             const code = 'GE-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+            
+            const genBtn = event.target;
+            genBtn.disabled = true;
+            genBtn.innerHTML = '<span class="loading-spinner"></span> Generating...';
             
             try {
                 const response = await fetch('https://api.jsonbin.io/v3/b', {
@@ -5319,13 +5923,18 @@
                     body: JSON.stringify({
                         code: code,
                         profile: profile,
-                        created: new Date().toISOString()
+                        created: new Date().toISOString(),
+                        deviceId: generateDeviceId()
                     })
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
                 const data = await response.json();
                 
-                if (data.metadata && data.metadata.id) {
+                if (data.success !== false && data.metadata && data.metadata.id) {
                     const binId = data.metadata.id;
                     localStorage.setItem('syncCode_' + code, binId);
                     
@@ -5339,14 +5948,18 @@
                         height: 200
                     });
                     
-                    console.log('✓ Manual sync code generated!');
+                    console.log('✓ Manual sync code generated!', code);
+                    genBtn.innerHTML = '✨ Generate Code';
+                    genBtn.disabled = false;
                 } else {
-                    throw new Error('Invalid response from JSONbin');
+                    throw new Error(data.error || 'Invalid response from JSONbin');
                 }
                 
             } catch (error) {
-                console.error('Sync error:', error);
-                alert('⚠️ Failed to generate code. Please check your internet connection.');
+                console.error('✗ Sync error:', error);
+                alert(`⚠️ Failed to generate code: ${error.message}`);
+                genBtn.innerHTML = '✨ Generate Code';
+                genBtn.disabled = false;
             }
         }
 
@@ -5358,6 +5971,11 @@
         }
 
         async function loadFromCode() {
+            if (!validateConfiguration()) {
+                alert('⚠️ Sync is not properly configured.');
+                return;
+            }
+
             const code = document.getElementById('codeInput').value.trim().toUpperCase();
             
             if (!code || !code.startsWith('GE-')) {
@@ -5372,7 +5990,11 @@
             try {
                 const binId = localStorage.getItem('syncCode_' + code);
                 
-                if (binId && binId.length > 10) {
+                if (!binId || binId.length < 5) {
+                    // Try fetching from cloud if not in local storage
+                    console.log('Code not found locally, trying cloud fetch...');
+                    alert('⚠️ Code not found. Codes expire after 7 days.');
+                } else {
                     try {
                         const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
                             method: 'GET',
@@ -5381,10 +6003,15 @@
                             }
                         });
 
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+
                         const data = await response.json();
                         
                         if (data.record && data.record.profile) {
                             const profile = data.record.profile;
+                            localStorage.setItem('lastModified', data.record.created || new Date().toISOString());
                             saveProfileData(profile);
                             updateUI(profile);
                             closeSyncModal();
@@ -5394,15 +6021,15 @@
                             return;
                         }
                     } catch (cloudError) {
-                        console.warn('Cloud fetch failed:', cloudError);
+                        console.warn('✗ Cloud fetch failed:', cloudError.message);
                     }
                 }
                 
-                alert('⚠️ Code not found. Make sure you entered it correctly.');
+                alert('⚠️ Code not found or expired. Make sure you entered it correctly.');
                 
             } catch (error) {
-                console.error('Load error:', error);
-                alert('❌ Failed to load profile. Please try again.');
+                console.error('✗ Load error:', error);
+                alert(`❌ Failed to load profile: ${error.message}`);
             } finally {
                 loadBtn.disabled = false;
                 loadBtn.innerHTML = '🔄 Load Profile';
@@ -6450,9 +7077,268 @@
         }
 
         // Quest System Functions
+        // ==================== RPG QUEST SYSTEM ====================
+        
+        // Character Data Structure
+        let characterData = {
+            level: 1,
+            xp: 0,
+            xpToNext: 100,
+            virtues: {
+                thoth: 0,
+                maat: 0,
+                caerus: 0
+            },
+            completedQuests: {
+                daily: [],
+                weekly: [],
+                monthly: [],
+                caerus: []
+            },
+            stats: {
+                daysActive: 0,
+                totalWorkings: 0
+            }
+        };
+
+        // Quest Templates
+        // ===== LUNAR PHASE CALCULATOR =====
+        function getMoonPhase(date = new Date()) {
+            // Known new moon: January 6, 2000
+            const knownNewMoon = new Date(2000, 0, 6);
+            const lunarCycle = 29.53058867; // days
+            const daysSinceNewMoon = (date - knownNewMoon) / (1000 * 60 * 60 * 24);
+            const phase = ((daysSinceNewMoon % lunarCycle) / lunarCycle) * 100;
+            
+            // Determine phase name
+            if (phase < 12.5 || phase >= 87.5) return 'new';      // 0-12.5% or 87.5-100%
+            if (phase >= 12.5 && phase < 37.5) return 'waxing';   // 12.5-37.5%
+            if (phase >= 37.5 && phase < 62.5) return 'full';     // 37.5-62.5%
+            if (phase >= 62.5 && phase < 87.5) return 'waning';   // 62.5-87.5%
+        }
+        
+        function getMoonEmoji(phase) {
+            const phaseMap = { new: '🌑', waxing: '🌓', full: '🌕', waning: '🌗' };
+            return phaseMap[phase] || '🌙';
+        }
+        
+        // Get weekly quests based on current moon phase
+        function getWeeklyQuestTemplates() {
+            const phase = getMoonPhase();
+            const templates = {
+                new: [
+                    {
+                        id: 'weekly-new-moon',
+                        name: 'New Moon Intentions 🌑',
+                        description: 'Set intentions for the lunar cycle and document them',
+                        virtue: 'caerus',
+                        emoji: '🌑',
+                        reward: { xp: 200, virtue: 'caerus', vp: 40 }
+                    },
+                    {
+                        id: 'weekly-new-study',
+                        name: 'Thoth\'s Wisdom',
+                        description: 'Study lunar cycles and their timing significance',
+                        virtue: 'thoth',
+                        emoji: '📚',
+                        reward: { xp: 150, virtue: 'thoth', vp: 30 }
+                    },
+                    {
+                        id: 'weekly-new-balance',
+                        name: 'New Beginning Balance',
+                        description: 'Practice cleansing and preparation workings',
+                        virtue: 'maat',
+                        emoji: '⚖️',
+                        reward: { xp: 150, virtue: 'maat', vp: 30 }
+                    }
+                ],
+                waxing: [
+                    {
+                        id: 'weekly-waxing-growth',
+                        name: 'Waxing Growth 🌓',
+                        description: 'Perform a growth or attraction working during waxing moon',
+                        virtue: 'caerus',
+                        emoji: '🌓',
+                        reward: { xp: 200, virtue: 'caerus', vp: 50 }
+                    },
+                    {
+                        id: 'weekly-waxing-study',
+                        name: 'Building Knowledge',
+                        description: 'Document advancement in your magical studies',
+                        virtue: 'thoth',
+                        emoji: '📖',
+                        reward: { xp: 150, virtue: 'thoth', vp: 30 }
+                    },
+                    {
+                        id: 'weekly-waxing-working',
+                        name: 'Manifestation Work',
+                        description: 'Perform growth or attraction workings',
+                        virtue: 'maat',
+                        emoji: '✨',
+                        reward: { xp: 150, virtue: 'maat', vp: 30 }
+                    }
+                ],
+                full: [
+                    {
+                        id: 'weekly-full-power',
+                        name: 'Full Moon Power 🌕',
+                        description: 'Charge talismans or perform peak energy working at full moon',
+                        virtue: 'caerus',
+                        emoji: '🌕',
+                        reward: { xp: 250, virtue: 'caerus', vp: 50 }
+                    },
+                    {
+                        id: 'weekly-full-wisdom',
+                        name: 'Full Moon Illumination',
+                        description: 'Record revelations and insights gained this cycle',
+                        virtue: 'thoth',
+                        emoji: '💎',
+                        reward: { xp: 200, virtue: 'thoth', vp: 40 }
+                    },
+                    {
+                        id: 'weekly-full-working',
+                        name: 'Peak Energy Working',
+                        description: 'Perform your most powerful working at full moon',
+                        virtue: 'maat',
+                        emoji: '⚡',
+                        reward: { xp: 200, virtue: 'maat', vp: 40 }
+                    }
+                ],
+                waning: [
+                    {
+                        id: 'weekly-waning-release',
+                        name: 'Waning Release 🌗',
+                        description: 'Perform banishing or purification during waning moon',
+                        virtue: 'maat',
+                        emoji: '🌗',
+                        reward: { xp: 200, virtue: 'maat', vp: 50 }
+                    },
+                    {
+                        id: 'weekly-waning-study',
+                        name: 'Banishing Knowledge',
+                        description: 'Study techniques for removing unwanted influences',
+                        virtue: 'thoth',
+                        emoji: '🔪',
+                        reward: { xp: 150, virtue: 'thoth', vp: 30 }
+                    },
+                    {
+                        id: 'weekly-waning-cleanse',
+                        name: 'Cleansing Ritual',
+                        description: 'Perform a complete cleansing or purification',
+                        virtue: 'caerus',
+                        emoji: '🌊',
+                        reward: { xp: 150, virtue: 'caerus', vp: 30 }
+                    }
+                ]
+            };
+            return templates[phase] || templates.new;
+        }
+        
+        const dailyQuestTemplates = [
+            {
+                id: 'daily-study',
+                name: 'Morning Meditation',
+                description: 'Spend 10 minutes in quiet contemplation at your studiolo',
+                virtue: 'thoth',
+                emoji: '🌙',
+                reward: { xp: 50, virtue: 'thoth', vp: 10 }
+            },
+            {
+                id: 'daily-practice',
+                name: 'Study Session',
+                description: 'Read and document learnings from one of your volumes',
+                virtue: 'thoth',
+                emoji: '📖',
+                reward: { xp: 75, virtue: 'thoth', vp: 15 }
+            },
+            {
+                id: 'daily-journal',
+                name: 'Document a Working',
+                description: 'Perform and record a working in your grimoire',
+                virtue: 'maat',
+                emoji: '✨',
+                reward: { xp: 100, virtue: 'maat', vp: 20 }
+            }
+        ];
+
+        const monthlyQuestTemplates = [
+            {
+                id: 'monthly-dedication',
+                name: 'Path of Dedication',
+                description: 'Complete 20 daily quests this month',
+                virtue: 'thoth',
+                emoji: '📚',
+                reward: { xp: 500, virtue: 'thoth', vp: 100 }
+            },
+            {
+                id: 'monthly-mastery',
+                name: 'Mastery Pursuit',
+                description: 'Perform 10 documented workings this month',
+                virtue: 'maat',
+                emoji: '⚖️',
+                reward: { xp: 750, virtue: 'maat', vp: 150 }
+            },
+            {
+                id: 'monthly-balance',
+                name: 'Balanced Scribe',
+                description: 'Reach 100 points in all three virtues',
+                virtue: 'caerus',
+                emoji: '✨',
+                reward: { xp: 750, virtue: 'caerus', vp: 150 }
+            }
+        ];
+
+        // Save/Load Character Data
+        function saveCharacterData() {
+            localStorage.setItem('characterData', JSON.stringify(characterData));
+        }
+
+        function loadCharacterData() {
+            const saved = localStorage.getItem('characterData');
+            if (saved) {
+                characterData = JSON.parse(saved);
+            }
+        }
+
+        // Add XP (Exponential formula: 100 * 1.2^(level-1))
+        function addXP(amount) {
+            characterData.xp += amount;
+            while (characterData.xp >= characterData.xpToNext) {
+                characterData.xp -= characterData.xpToNext;
+                characterData.level += 1;
+                // Exponential XP curve: each level requires 1.2x more XP than previous
+                characterData.xpToNext = Math.floor(100 * Math.pow(1.2, characterData.level - 1));
+            }
+            saveCharacterData();
+        }
+
+        // Add Virtue Points
+        function addVirtuePoints(virtue, amount) {
+            const v = String(virtue).toLowerCase().trim();
+            if (['thoth','maat','caerus'].includes(v)) {
+                characterData.virtues[v] += amount;
+            }
+            saveCharacterData();
+        }
+
+        // Get quest template by frequency
+        function getQuestTemplates(frequency) {
+            switch(frequency) {
+                case 'daily': return dailyQuestTemplates;
+                case 'weekly': return getWeeklyQuestTemplates(); // Dynamic based on moon phase
+                case 'monthly': return monthlyQuestTemplates;
+                default: return [];
+            }
+        }
+
+        // Initialize Quest System
         function initializeQuestSystem() {
+            loadCharacterData();
             checkQuestResets();
-            loadAllQuests();
+            // Render all quest types
+            renderQuests('daily');
+            renderQuests('weekly');
+            renderQuests('monthly');
             startQuestTimers();
             // Mark debug status
             window.__debug = window.__debug || {};
@@ -6492,264 +7378,128 @@
         function getWeekStart(date) {
             const d = new Date(date);
             const day = d.getDay();
-            const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
             return new Date(d.setDate(diff));
         }
 
-        function loadAllQuests() {
-            loadQuests('daily', getQuestData().daily);
-            loadQuests('weekly', getQuestData().weekly);
-            loadQuests('monthly', getQuestData().monthly);
-        }
-
-        function getQuestData() {
-            return {
-                daily: [
-                    {
-                        id: 'daily-study',
-                        name: 'Morning Study',
-                        description: 'Read and take notes for at least 15 minutes',
-                        virtue: 'thoth',
-                        emoji: '🌙',
-                        experience: 10
-                    },
-                    {
-                        id: 'daily-practice',
-                        name: 'Daily Practice',
-                        description: 'Complete one working or ritual practice',
-                        virtue: 'maat',
-                        emoji: '⚖️',
-                        experience: 10
-                    },
-                    {
-                        id: 'daily-journal',
-                        name: 'Reflection Journal',
-                        description: 'Write a journal entry about your progress',
-                        virtue: 'caerus',
-                        emoji: '⚡',
-                        experience: 10
-                    }
-                ],
-                weekly: [
-                    {
-                        id: 'weekly-volumes',
-                        name: 'Volume Reading',
-                        description: 'Complete reading one full volume',
-                        virtue: 'thoth',
-                        emoji: '🌙',
-                        experience: 50
-                    },
-                    {
-                        id: 'weekly-cleansing',
-                        name: 'Cleansing Ritual',
-                        description: 'Perform a cleansing or balancing ritual',
-                        virtue: 'maat',
-                        emoji: '⚖️',
-                        experience: 50
-                    },
-                    {
-                        id: 'weekly-moon',
-                        name: 'Lunar Observation',
-                        description: 'Track moon phases and planetary hours',
-                        virtue: 'caerus',
-                        emoji: '⚡',
-                        experience: 50
-                    }
-                ],
-                monthly: [
-                    {
-                        id: 'monthly-mastery',
-                        name: 'Path of Mastery',
-                        description: 'Practice daily for 20+ days this month',
-                        virtue: 'thoth',
-                        emoji: '🌙',
-                        experience: 150
-                    },
-                    {
-                        id: 'monthly-balance',
-                        name: 'Balanced Practice',
-                        description: 'Complete quests in all three virtues',
-                        virtue: 'maat',
-                        emoji: '⚖️',
-                        experience: 150
-                    },
-                    {
-                        id: 'monthly-timing',
-                        name: 'Perfect Timing',
-                        description: 'Complete 10 workings during optimal planetary hours',
-                        virtue: 'caerus',
-                        emoji: '⚡',
-                        experience: 150
-                    }
-                ]
-            };
-        }
-
-        // Local RPG fallback: award experience directly to grimorioProfile
-        function awardExperienceLocal(virtue, amount, opts = {}) {
-            const richProfile = JSON.parse(localStorage.getItem('grimorioProfile') || '{}');
-            if (!richProfile.thoth || !richProfile.maat || !richProfile.caerus) {
-                richProfile.thoth = richProfile.thoth || { points: 0, level: 1 };
-                richProfile.maat = richProfile.maat || { points: 0, level: 1 };
-                richProfile.caerus = richProfile.caerus || { points: 0, level: 1 };
-            }
-            // Add virtue points and total points
-            const v = virtue.toLowerCase();
-            if (['thoth','maat','caerus'].includes(v)) {
-                richProfile[v].points = (richProfile[v].points || 0) + amount;
-                richProfile.totalPoints = (richProfile.totalPoints || 0) + amount;
-                // Recompute virtue level: 100 pts per level
-                richProfile[v].level = Math.floor((richProfile[v].points || 0) / 100) + 1;
-            }
-            // Increment workings for practice-type quests
-            if (opts.incrementWorkings) {
-                richProfile.totalWorkings = (richProfile.totalWorkings || 0) + 1;
-            }
-            // Persist
-            localStorage.setItem('grimorioProfile', JSON.stringify(richProfile));
-            // Update UI immediately
-            const profile = loadProfile();
-            updateUI(profile);
-            return richProfile;
-        }
-
-        function loadQuests(frequency, quests) {
-            const container = document.getElementById(`${frequency}Quests`);
-            if (!container) return;
-            
-            const questProgress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+        // Render quests with progression tracking
+        function renderQuests(frequency) {
+            const templates = getQuestTemplates(frequency);
+            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
             const completedKey = `completed${frequency.charAt(0).toUpperCase() + frequency.slice(1)}`;
-            const completed = questProgress[completedKey] || [];
+            const completed = progress[completedKey] || [];
             
-            container.innerHTML = quests.map(quest => {
+            const container = document.getElementById(`${frequency}QuestsList`);
+            if (!container) return;
+
+            container.innerHTML = templates.map(quest => {
                 const isCompleted = completed.includes(quest.id);
                 return `
                     <div class="quest-card ${isCompleted ? 'completed' : ''}" data-quest-id="${quest.id}">
-                        <div class="quest-header">
-                            <div class="quest-title">${quest.name}</div>
-                            <div class="quest-virtue">${quest.emoji}</div>
-                        </div>
-                        <div class="quest-description">${quest.description}</div>
-                        <div class="quest-footer">
-                            <div class="quest-reward">+${quest.experience} ${quest.virtue.toUpperCase()} XP</div>
-                            <input 
-                                type="checkbox" 
-                                class="quest-checkbox" 
-                                ${isCompleted ? 'checked disabled' : ''}
-                                onchange="completeQuest('${frequency}', '${quest.id}', '${quest.virtue}', ${quest.experience})"
-                            >
+                        <input 
+                            type="checkbox" 
+                            class="quest-checkbox" 
+                            ${isCompleted ? 'checked disabled' : ''}
+                            onchange="completeQuest('${frequency}', '${quest.id}')"
+                        >
+                        <div class="quest-card-content">
+                            <div class="quest-card-title">${quest.emoji} ${quest.name}</div>
+                            <div class="quest-card-description">${quest.description}</div>
+                            <div class="quest-card-reward">
+                                <div class="quest-card-reward-item">
+                                    <span style="font-weight: 600; color: var(--caerus-gold);">+${quest.reward.xp}</span>
+                                    <span>${quest.reward.virtue.toUpperCase()}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
             }).join('');
+
+            // Update progress bars
+            updateQuestProgress(frequency, completed.length, templates.length);
         }
 
-        function completeQuest(frequency, questId, virtue, experience) {
-            const questProgress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+        // Update quest progress bars and display
+        function updateQuestProgress(frequency, completed, total) {
+            const progressBar = document.getElementById(`${frequency}ProgressBar`);
+            const countDisplay = document.getElementById(`${frequency}QuestCount`);
+            const rewardText = document.getElementById(`${frequency}RewardText`);
+            
+            if (progressBar) {
+                const percentage = total > 0 ? (completed / total) * 100 : 0;
+                progressBar.style.width = `${percentage}%`;
+            }
+            
+            if (countDisplay) {
+                countDisplay.textContent = `${completed} / ${total}`;
+            }
+
+            // Show bonus message if all completed
+            if (rewardText && completed === total && total > 0) {
+                const bonusText = {
+                    'daily': '✨ Daily bonus complete! +5 Ma\'at awarded!',
+                    'weekly': '✨ Weekly bonus complete! +10 Thoth awarded!',
+                    'monthly': '✨ Monthly bonus complete! +20 Caerus awarded!'
+                };
+                rewardText.textContent = bonusText[frequency] || 'Bonus pending...';
+                rewardText.style.color = 'var(--caerus-gold)';
+            }
+        }
+
+        // Complete a Quest
+        function completeQuest(frequency, questId) {
+            // Look up quest from templates
+            const templates = getQuestTemplates(frequency);
+            const quest = templates.find(q => q.id === questId);
+            
+            if (!quest) {
+                console.error(`Quest not found: ${questId}`);
+                return;
+            }
+            
+            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
             const completedKey = `completed${frequency.charAt(0).toUpperCase() + frequency.slice(1)}`;
             
-            if (!questProgress[completedKey]) {
-                questProgress[completedKey] = [];
+            if (!progress[completedKey]) {
+                progress[completedKey] = [];
             }
             
             // Add to completed list
-            questProgress[completedKey].push(questId);
-            localStorage.setItem('questProgress', JSON.stringify(questProgress));
-            
-            // Award experience: prefer rpg-system.js, otherwise fallback locally
-            if (window.grimorioRPG && typeof window.grimorioRPG.awardExperience === 'function') {
-                window.grimorioRPG.awardExperience(virtue, experience);
-            } else {
-                const incrementWorkings = questId.includes('practice');
-                awardExperienceLocal(virtue, experience, { incrementWorkings });
+            if (!progress[completedKey].includes(questId)) {
+                progress[completedKey].push(questId);
             }
             
-            // Get quest name for activity feed
-            const questData = getQuestData();
-            const allQuests = [...questData.daily, ...questData.weekly, ...questData.monthly];
-            const quest = allQuests.find(q => q.id === questId);
-            const questName = quest ? quest.name : 'Quest';
+            localStorage.setItem('questProgress', JSON.stringify(progress));
             
-            // Add to activity feed
-            addActivityFeedItem(quest.emoji, `Completed ${questName}`, `+${experience} ${virtue.toUpperCase()} XP`);
+            // Award XP and Virtue Points - use grimorioProfile as single source of truth
+            addXP(quest.reward.xp);
             
-            // Update UI
-            const card = document.querySelector(`[data-quest-id="${questId}"]`);
-            if (card) {
-                card.classList.add('completed');
-                const checkbox = card.querySelector('.quest-checkbox');
-                checkbox.disabled = true;
-            }
+            // Update rich profile (primary storage)
+            const richProfile = JSON.parse(localStorage.getItem('grimorioProfile') || '{}');
+            if (!richProfile.thoth) richProfile.thoth = { points: 0, level: 1 };
+            if (!richProfile.maat) richProfile.maat = { points: 0, level: 1 };
+            if (!richProfile.caerus) richProfile.caerus = { points: 0, level: 1 };
+            
+            richProfile[quest.reward.virtue].points = (richProfile[quest.reward.virtue].points || 0) + quest.reward.vp;
+            richProfile.totalPoints = (richProfile.totalPoints || 0) + quest.reward.vp;
+            richProfile.totalWorkings = (richProfile.totalWorkings || 0) + 1;
+            richProfile[quest.reward.virtue].level = Math.floor(richProfile[quest.reward.virtue].points / 100) + 1;
+            
+            localStorage.setItem('grimorioProfile', JSON.stringify(richProfile));
+            
+            // Sync to characterData for consistency
+            characterData.virtues[quest.reward.virtue] = richProfile[quest.reward.virtue].points;
             
             // Show success message
-            showQuestNotification(`Quest Complete! +${experience} ${virtue.toUpperCase()} XP`);
+            showQuestNotification(`✨ Quest Complete! +${quest.reward.xp} XP, +${quest.reward.vp} ${quest.reward.virtue.toUpperCase()}`);
             
-            // Refresh dashboard display
+            // Re-render quests to update UI
+            renderQuests(frequency);
+            
+            // Update profile display
             const profile = loadProfile();
             updateUI(profile);
-        }
-
-        // Debug-only helper: complete all daily quests quickly
-        function completeAllDailyQuestsDebug() {
-            if (!isDebugEnabled()) {
-                alert('Enable 🐞 Debug to use test actions.');
-                return;
-            }
-            const questData = getQuestData();
-            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
-            const completedDaily = progress.completedDaily || [];
-            const toComplete = questData.daily.filter(q => !completedDaily.includes(q.id));
-            if (toComplete.length === 0) {
-                showQuestNotification('All daily quests already completed.');
-                return;
-            }
-            toComplete.forEach((q, idx) => {
-                setTimeout(() => {
-                    completeQuest('daily', q.id, q.virtue, q.experience);
-                }, idx * 200);
-            });
-        }
-
-        // Debug-only helper: complete all weekly quests quickly
-        function completeAllWeeklyQuestsDebug() {
-            if (!isDebugEnabled()) {
-                alert('Enable 🐞 Debug to use test actions.');
-                return;
-            }
-            const questData = getQuestData();
-            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
-            const completedWeekly = progress.completedWeekly || [];
-            const toComplete = questData.weekly.filter(q => !completedWeekly.includes(q.id));
-            if (toComplete.length === 0) {
-                showQuestNotification('All weekly quests already completed.');
-                return;
-            }
-            toComplete.forEach((q, idx) => {
-                setTimeout(() => {
-                    completeQuest('weekly', q.id, q.virtue, q.experience);
-                }, idx * 250);
-            });
-        }
-
-        // Debug-only helper: complete all monthly quests quickly
-        function completeAllMonthlyQuestsDebug() {
-            if (!isDebugEnabled()) {
-                alert('Enable 🐞 Debug to use test actions.');
-                return;
-            }
-            const questData = getQuestData();
-            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
-            const completedMonthly = progress.completedMonthly || [];
-            const toComplete = questData.monthly.filter(q => !completedMonthly.includes(q.id));
-            if (toComplete.length === 0) {
-                showQuestNotification('All monthly quests already completed.');
-                return;
-            }
-            toComplete.forEach((q, idx) => {
-                setTimeout(() => {
-                    completeQuest('monthly', q.id, q.virtue, q.experience);
-                }, idx * 300);
-            });
         }
 
         function showQuestNotification(message) {
@@ -6779,6 +7529,75 @@
                 notification.style.animation = 'slideOutRight 0.5s ease';
                 setTimeout(() => notification.remove(), 500);
             }, 3000);
+        }
+
+        // Debug-only helper: complete all daily quests quickly
+        function completeAllDailyQuestsDebug() {
+            if (!isDebugEnabled()) {
+                alert('Enable 🐞 Debug to use test actions.');
+                return;
+            }
+            const toComplete = dailyQuestTemplates;
+            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            const completedDaily = progress.completedDaily || [];
+            const remaining = toComplete.filter(q => !completedDaily.includes(q.id));
+            
+            if (remaining.length === 0) {
+                showQuestNotification('All daily quests already completed.');
+                return;
+            }
+            
+            remaining.forEach((q, idx) => {
+                setTimeout(() => {
+                    completeQuest('daily', q.id);
+                }, idx * 200);
+            });
+        }
+
+        // Debug-only helper: complete all weekly quests quickly
+        function completeAllWeeklyQuestsDebug() {
+            if (!isDebugEnabled()) {
+                alert('Enable 🐞 Debug to use test actions.');
+                return;
+            }
+            const toComplete = weeklyQuestTemplates;
+            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            const completedWeekly = progress.completedWeekly || [];
+            const remaining = toComplete.filter(q => !completedWeekly.includes(q.id));
+            
+            if (remaining.length === 0) {
+                showQuestNotification('All weekly quests already completed.');
+                return;
+            }
+            
+            remaining.forEach((q, idx) => {
+                setTimeout(() => {
+                    completeQuest('weekly', q.id);
+                }, idx * 250);
+            });
+        }
+
+        // Debug-only helper: complete all monthly quests quickly
+        function completeAllMonthlyQuestsDebug() {
+            if (!isDebugEnabled()) {
+                alert('Enable 🐞 Debug to use test actions.');
+                return;
+            }
+            const toComplete = monthlyQuestTemplates;
+            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            const completedMonthly = progress.completedMonthly || [];
+            const remaining = toComplete.filter(q => !completedMonthly.includes(q.id));
+            
+            if (remaining.length === 0) {
+                showQuestNotification('All monthly quests already completed.');
+                return;
+            }
+            
+            remaining.forEach((q, idx) => {
+                setTimeout(() => {
+                    completeQuest('monthly', q.id);
+                }, idx * 300);
+            });
         }
 
         function startQuestTimers() {
@@ -7057,63 +7876,45 @@
                 }
             }
             
+            // Render quests if switching to a quest view
+            if (viewName === 'daily-quests') {
+                renderQuests('daily');
+            } else if (viewName === 'weekly-quests') {
+                renderQuests('weekly');
+            } else if (viewName === 'monthly-quests') {
+                renderQuests('monthly');
+            }
+            
             // Load content based on view
             loadViewContent(viewName);
         }
 
         function loadViewContent(viewName) {
+            // Simply show/hide the content-view divs - no need to load or modify them
+            // The HTML content already exists in the page
             const contentArea = document.getElementById('content-' + viewName);
-            if (!contentArea) return;
-            
-            // Load content based on view type
-            switch(viewName) {
-                case 'overview':
-                    // Show overview/dashboard content
-                    contentArea.innerHTML = document.getElementById('activityTabContent')?.innerHTML || '<p>Loading overview...</p>';
-                    initializeQuestSystem();
-                    displayActivityFeed();
-                    break;
-                case 'daily-quests':
-                case 'weekly-quests':
-                case 'monthly-quests':
-                    // Show quest content
-                    const questType = viewName.replace('-quests', '');
-                    contentArea.innerHTML = `
-                        <h2 class="activity-title">${questType.charAt(0).toUpperCase() + questType.slice(1)} Quests</h2>
-                        <div class="quest-timer">
-                            <div class="quest-timer-label">Resets in</div>
-                            <div class="quest-timer-value" id="${questType}Timer">--:--:--</div>
-                        </div>
-                        <div class="quest-grid" id="${questType}Quests"></div>
-                    `;
-                    initializeQuestSystem();
-                    break;
-                case 'moon-tracker':
-                    contentArea.innerHTML = document.getElementById('moonTrackerContent')?.innerHTML || '<p>Loading moon tracker...</p>';
-                    if (typeof updateMoonTracker === 'function') updateMoonTracker();
-                    break;
-                case 'character-info':
-                    contentArea.innerHTML = document.getElementById('profileTabContent')?.innerHTML || '<p>Loading profile...</p>';
-                    loadProfileView();
-                    break;
-                case 'journal':
-                case 'notes':
-                case 'toolkit':
-                case 'progress':
-                    // Load from existing tab content
-                    const tabContent = document.getElementById(viewName + 'TabContent') || 
-                                     document.getElementById(viewName.replace('-', '') + 'TabContent');
-                    if (tabContent) {
-                        contentArea.innerHTML = tabContent.innerHTML;
-                    }
-                    break;
-                default:
-                    contentArea.innerHTML = '<p>Content loading...</p>';
+            if (!contentArea) {
+                // If content-view doesn't exist, create a placeholder
+                const mainContentArea = document.querySelector('.main-content-area');
+                if (mainContentArea) {
+                    const newView = document.createElement('div');
+                    newView.id = 'content-' + viewName;
+                    newView.className = 'content-view active';
+                    newView.innerHTML = `<p style="font-size: 1.2rem; text-align: center; margin-top: 50px;">Coming soon: ${viewName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>`;
+                    mainContentArea.appendChild(newView);
+                }
+                return;
             }
+            
+            // Content view exists - just make sure it's visible
+            // (the switchView function already handles hide/show)
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // Clear quest progress for fresh testing
+            localStorage.removeItem('questProgress');
+            
             const profile = loadProfile();
             updateUI(profile);
             
