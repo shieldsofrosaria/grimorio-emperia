@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scribe's Dashboard - Grimorio Emperia</title>
+    <title>Grimorio Emperia - Student Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>📜</text></svg>" type="image/svg+xml">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@400;600&family=MedievalSharp&display=swap');
 
@@ -1910,6 +1911,78 @@
             color: #ff6b6b;
         }
 
+        /* Specialization Card Styles */
+        .spec-card {
+            background: linear-gradient(135deg, rgba(45, 27, 78, 0.4), rgba(74, 44, 109, 0.2));
+            border: 2px solid var(--caerus-gold);
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .spec-card.locked {
+            border-color: rgba(212, 175, 55, 0.3);
+            opacity: 0.6;
+            background: linear-gradient(135deg, rgba(45, 27, 78, 0.2), rgba(74, 44, 109, 0.1));
+        }
+
+        .spec-card.unlocked:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(218, 165, 32, 0.4);
+            border-color: var(--caerus-bright);
+        }
+
+        .spec-header {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .spec-icon {
+            font-size: 1.8rem;
+        }
+
+        .spec-info {
+            flex: 1;
+        }
+
+        .spec-title {
+            font-weight: 600;
+            color: var(--caerus-gold);
+            font-size: 1rem;
+            font-family: 'Cinzel', serif;
+        }
+
+        .spec-status {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .spec-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .spec-progress {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--caerus-deep), var(--caerus-bright));
+            border-radius: 4px;
+        }
+
         .field-input-compact {
             width: 100%;
             background: rgba(0, 0, 0, 0.3);
@@ -2374,6 +2447,80 @@
             color: var(--caerus-gold);
         }
 
+        /* Quill Rich Text Editor Styling */
+        .ql-toolbar {
+            background: rgba(0, 0, 0, 0.4) !important;
+            border: 2px solid var(--mystic-purple) !important;
+            border-bottom: none !important;
+            border-radius: 8px 8px 0 0 !important;
+        }
+
+        .ql-container {
+            background: rgba(0, 0, 0, 0.3) !important;
+            border: 2px solid var(--mystic-purple) !important;
+            border-top: none !important;
+            border-radius: 0 0 8px 8px !important;
+            font-family: 'Cormorant Garamond', serif !important;
+        }
+
+        .ql-editor {
+            color: var(--text-primary) !important;
+            min-height: 120px !important;
+            padding: 15px !important;
+        }
+
+        .ql-editor.ql-blank::before {
+            color: var(--text-secondary) !important;
+            font-style: italic;
+        }
+
+        .ql-toolbar button:hover,
+        .ql-toolbar button.ql-active,
+        .ql-toolbar button:focus {
+            color: var(--caerus-gold) !important;
+        }
+
+        .ql-stroke {
+            stroke: var(--text-primary) !important;
+        }
+
+        .ql-stroke.ql-active,
+        .ql-stroke.ql-hover,
+        .ql-picker-label {
+            stroke: var(--caerus-gold) !important;
+        }
+
+        .ql-fill,
+        .ql-stroke.ql-fill {
+            fill: var(--text-primary) !important;
+        }
+
+        .ql-fill.ql-active,
+        .ql-fill.ql-hover,
+        .ql-stroke.ql-fill.ql-active,
+        .ql-stroke.ql-fill.ql-hover {
+            fill: var(--caerus-gold) !important;
+        }
+
+        .ql-picker {
+            color: var(--text-primary) !important;
+        }
+
+        .ql-picker-options {
+            background: var(--void-black) !important;
+            border: 1px solid var(--mystic-purple) !important;
+        }
+
+        .ql-picker-item {
+            color: var(--text-primary) !important;
+        }
+
+        .ql-picker-item.ql-selected,
+        .ql-picker-item:hover {
+            color: var(--caerus-gold) !important;
+            background: rgba(212, 175, 32, 0.1) !important;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2rem;
@@ -2437,7 +2584,7 @@
             </ul>
 
             <div class="nav-actions">
-                <button class="nav-btn edit-btn" onclick="openProfileModal()">
+                <button class="nav-btn edit-btn" onclick="switchSection('you'); toggleProfileEdit(); return false;">
                     ✏️ Edit
                 </button>
                 <button class="nav-btn sync-btn" id="navSyncBtn" onclick="openSyncModal()">
@@ -2460,7 +2607,7 @@
                 <!-- Profile Card -->
                 <div class="profile-card">
                     <div class="profile-header">
-                        <div class="profile-avatar" id="profileAvatar" onclick="openProfileModal()">
+                        <div class="profile-avatar" id="profileAvatar" onclick="switchSection('you'); return false;">
                             📜
                         </div>
                         <h2 class="scribe-title" id="scribeName">Lord Edmund Ashford</h2>
@@ -2588,33 +2735,49 @@
                             </div>
 
                             <div class="profile-display-card">
-                                <div class="profile-section-header">📋 Basic Information</div>
+                                <div class="profile-section-header">📋 Scribe Information</div>
                                 <div class="profile-info-grid">
                                     <div class="profile-info-item">
-                                        <div class="profile-info-label">Full Name</div>
-                                        <div class="profile-info-value" id="viewFullName">Lord Edmund Ashford</div>
+                                        <div class="profile-info-label">🌙 Scribe Name</div>
+                                        <div class="profile-info-value" id="viewFullName">Unnamed Scribe</div>
                                     </div>
                                     <div class="profile-info-item">
-                                        <div class="profile-info-label">Origin</div>
-                                        <div class="profile-info-value" id="viewOrigin">English nobleman turned empirical philosopher</div>
+                                        <div class="profile-info-label">⚡ Patron Virtue</div>
+                                        <div class="profile-info-value" id="viewPatronVirtue">Thoth</div>
+                                    </div>
+                                    <div class="profile-info-item">
+                                        <div class="profile-info-label">✨ Motto</div>
+                                        <div class="profile-info-value" id="viewPersonalMotto" style="font-style: italic;">Amo ĉiujn, fidu malmultajn, difektu neniun</div>
+                                    </div>
+                                    <div class="profile-info-item">
+                                        <div class="profile-info-label">📅 Oath Date</div>
+                                        <div class="profile-info-value" id="viewOathDate">Not Set</div>
+                                    </div>
+                                    <div class="profile-info-item">
+                                        <div class="profile-info-label">🕯️ Studiolo Location</div>
+                                        <div class="profile-info-value" id="viewOrigin">My Sacred Space</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="profile-display-card">
-                                <div class="profile-section-header">📖 Backstory</div>
+                                <div class="profile-section-header">🎯 Current Study Focus</div>
+                                <div class="profile-backstory-text" id="viewCurrentFocus">
+                                    Beginning the path of the Three Virtues
+                                </div>
+                            </div>
+
+                            <div class="profile-display-card">
+                                <div class="profile-section-header">📖 Character Backstory</div>
                                 <div class="profile-backstory-text" id="viewBackstory">
-                                    Born into English nobility in the late 13th century, Edmund was expected to continue the family's trading business. However, he found himself drawn to the pursuit of knowledge rather than wealth. His journey led him to the teachings of the Three Virtues.
+                                    Share your character's story and journey...
                                 </div>
                             </div>
 
                             <div class="profile-display-card">
                                 <div class="profile-section-header">🎯 Current Goals</div>
                                 <ul class="profile-goals-list" id="viewGoals">
-                                    <li>Master the Three Virtues path</li>
-                                    <li>Create comprehensive grimoire</li>
-                                    <li>Achieve Esperanto fluency</li>
-                                    <li>Build herbal/mineral reference library</li>
+                                    <li>Begin your journey</li>
                                 </ul>
                             </div>
                         </div>
@@ -2623,7 +2786,7 @@
                         <div id="profileEditMode" class="profile-edit-mode" style="display: none;">
                             <div class="profile-compact">
                                 <div class="profile-field-compact">
-                                    <label class="field-label-compact">Profile Photo</label>
+                                    <label class="field-label-compact">🎭 Profile Photo</label>
                                     <div class="profile-photo-upload">
                                         <div class="profile-photo-preview-edit" id="editProfilePhotoPreview">
                                             📜
@@ -2639,29 +2802,78 @@
                                 </div>
 
                                 <div class="profile-field-compact">
-                                    <label class="field-label-compact">Full Name</label>
-                                    <input type="text" class="field-input-compact" id="editFullName" value="Lord Edmund Ashford">
+                                    <label class="field-label-compact">🌙 Scribe Name</label>
+                                    <input type="text" class="field-input-compact" id="editScribeName" placeholder="Your name or magical name">
                                 </div>
 
                                 <div class="profile-field-compact">
-                                    <label class="field-label-compact">Origin</label>
-                                    <input type="text" class="field-input-compact" id="editOrigin" value="English nobleman turned empirical philosopher">
+                                    <label class="field-label-compact">✨ Personal Motto</label>
+                                    <input type="text" class="field-input-compact" id="editPersonalMotto" placeholder="Your guiding principle">
                                 </div>
 
                                 <div class="profile-field-compact">
-                                    <label class="field-label-compact">Backstory</label>
-                                    <textarea class="field-textarea-compact" id="editBackstory">Born into English nobility in the late 13th century, Edmund was expected to continue the family's trading business. However, he found himself drawn to the pursuit of knowledge rather than wealth. His journey led him to the teachings of the Three Virtues.</textarea>
+                                    <label class="field-label-compact">📅 Oath Date (When you began)</label>
+                                    <input type="date" class="field-input-compact" id="editOathDate">
                                 </div>
 
                                 <div class="profile-field-compact">
-                                    <label class="field-label-compact">Current Goals (one per line)</label>
-                                    <textarea class="field-textarea-compact" id="editGoals">Master the Three Virtues path
-Create comprehensive grimoire
-Achieve Esperanto fluency
-Build herbal/mineral reference library</textarea>
+                                    <label class="field-label-compact">🎯 Current Study Focus</label>
+                                    <textarea class="field-textarea-compact" id="editCurrentFocus" placeholder="What are you focusing on this moon cycle?"></textarea>
                                 </div>
 
-                                <button class="save-btn-compact" onclick="saveProfileChanges()">💾 Save Changes</button>
+                                <div class="profile-field-compact">
+                                    <label class="field-label-compact">🕯️ Studiolo Location</label>
+                                    <input type="text" class="field-input-compact" id="editStudioloLocation" placeholder="E.g., 'The Midnight Garden', 'Tower Study'">
+                                </div>
+
+                                <div class="profile-field-compact">
+                                    <label class="field-label-compact">⚡ Patron Virtue</label>
+                                    <select class="field-input-compact" id="editPatronVirtue">
+                                        <option value="thoth">🌙 Thoth (Wisdom)</option>
+                                        <option value="maat">⚖️ Ma'at (Balance)</option>
+                                        <option value="caerus">⚡ Caerus (Timing)</option>
+                                    </select>
+                                </div>
+
+                                <div class="profile-field-compact" style="border-top: 1px solid rgba(212, 175, 55, 0.2); padding-top: 20px; margin-top: 20px;">
+                                    <label class="field-label-compact">📖 Character Background</label>
+                                    <textarea class="field-textarea-compact" id="editBackstory" placeholder="Tell your character's story..."></textarea>
+                                </div>
+
+                                <div class="profile-field-compact">
+                                    <label class="field-label-compact">🎯 Current Goals (one per line)</label>
+                                    <textarea class="field-textarea-compact" id="editGoals" placeholder="Master the Three Virtues path&#10;Create comprehensive grimoire&#10;etc."></textarea>
+                                </div>
+
+                                <div class="profile-field-compact" style="border-top: 1px solid rgba(212, 175, 55, 0.2); padding-top: 20px; margin-top: 20px;">
+                                    <label class="field-label-compact">📓 In-Character Reflection</label>
+                                    <div id="editJournalReflection" style="min-height: 150px; background: rgba(0, 0, 0, 0.3); border: 2px solid var(--mystic-purple); border-radius: 8px;"></div>
+                                </div>
+
+                                <button class="save-btn-compact" onclick="saveProfileChanges()">💾 Save All Changes</button>
+                            </div>
+                        </div>
+
+                        <!-- Specialization Paths (in view mode) -->
+                        <div id="profileSpecializations" style="display: none; margin-top: 30px; border-top: 1px solid rgba(212, 175, 55, 0.2); padding-top: 20px;">
+                            <h4 style="color: var(--caerus-gold); margin-bottom: 15px;">🔱 Specialization Paths</h4>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px;">Unlock specializations at Journeyman rank (500+ total points)</p>
+                            <div id="specGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
+                                <!-- Specializations will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Reflection Journal (in view mode) -->
+                        <div id="profileJournal" style="display: none; margin-top: 30px; border-top: 1px solid rgba(212, 175, 55, 0.2); padding-top: 20px;">
+                            <h4 style="color: var(--caerus-gold); margin-bottom: 15px;">📓 In-Character Reflection</h4>
+                            <div style="background: rgba(26, 35, 50, 0.6); padding: 15px; border-radius: 10px; border-left: 4px solid var(--caerus-bright);">
+                                <p id="journalText" style="font-style: italic; color: var(--maat-bright); line-height: 1.8; min-height: 60px;">
+                                    No reflection yet. Share your thoughts about your journey through the Three Virtues.
+                                </p>
+                            </div>
+                            <div style="margin-top: 12px;">
+                                <textarea class="field-textarea-compact" id="editJournal" placeholder="Write your in-character reflection..."></textarea>
+                                <button class="save-btn-compact" onclick="saveJournalReflection()" style="margin-top: 8px;">💾 Save Reflection</button>
                             </div>
                         </div>
                     </div>
@@ -2683,7 +2895,7 @@ Build herbal/mineral reference library</textarea>
                                 <option value="personal">💭 Personal</option>
                             </select>
                             
-                            <textarea class="note-textarea-compact" id="noteContent" placeholder="Write your note..."></textarea>
+                            <div id="noteContentEditor" style="min-height: 150px; background: rgba(0, 0, 0, 0.3); border: 2px solid var(--mystic-purple); border-radius: 8px; margin-bottom: 12px;"></div>
                             
                             <button class="save-btn-compact" onclick="saveNote()" style="width: 100%;">💾 Save Note</button>
                         </div>
@@ -4069,6 +4281,10 @@ Build herbal/mineral reference library</textarea>
     <!-- QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
     <script>
         // Configuration
         const IMGBB_API_KEY = 'fecb6b8c48020815465bbc22d8c0e7b0';
@@ -4107,10 +4323,72 @@ Build herbal/mineral reference library</textarea>
             return deviceId;
         }
 
-        // Load profile
+        // Load profile and convert from rich schema to dashboard format
         function loadProfile() {
             const saved = localStorage.getItem('grimorioProfile');
-            return saved ? JSON.parse(saved) : defaultProfile;
+            if (!saved) return defaultProfile;
+            
+            const richProfile = JSON.parse(saved);
+            
+            // Map from rich profile schema (profile.js/quests.js) to dashboard format
+            return {
+                name: richProfile.scribeName || 'Unnamed Scribe',
+                rank: getRankTitle(richProfile.overallRank || 1),
+                avatar: richProfile.avatar || '📜',
+                avatarType: richProfile.avatarType || 'emoji',
+                avatarUrl: richProfile.avatarUrl || null,
+                level: Math.floor((richProfile.totalPoints || 0) / 100) + 1,
+                xp: (richProfile.totalPoints || 0) % 100,
+                xpMax: 100,
+                focus: calculateFocus(richProfile),
+                workings: richProfile.totalWorkings || 0,
+                daysActive: calculateDaysActive(richProfile),
+                virtues: {
+                    thoth: {
+                        points: richProfile.thoth?.points || 0,
+                        rank: getVirtueRank(richProfile.thoth?.level || 1),
+                        progress: ((richProfile.thoth?.points || 0) % 100)
+                    },
+                    maat: {
+                        points: richProfile.maat?.points || 0,
+                        rank: getVirtueRank(richProfile.maat?.level || 1),
+                        progress: ((richProfile.maat?.points || 0) % 100)
+                    },
+                    caerus: {
+                        points: richProfile.caerus?.points || 0,
+                        rank: getVirtueRank(richProfile.caerus?.level || 1),
+                        progress: ((richProfile.caerus?.points || 0) % 100)
+                    }
+                }
+            };
+        }
+        
+        // Convert rank number to title
+        function getRankTitle(rank) {
+            const titles = ['Initiate', 'Apprentice', 'Journeyman', 'Adept', 'Master', 'Grandmaster'];
+            return (titles[rank - 1] || 'Initiate') + ' Scribe';
+        }
+        
+        // Get virtue rank from level
+        function getVirtueRank(level) {
+            const virtueRanks = ['Seeker', 'Initiate', 'Novice', 'Apprentice', 'Scholar', 'Keeper', 'Master'];
+            return virtueRanks[Math.min(level - 1, 6)] || 'Seeker';
+        }
+        
+        // Calculate focus from practice stats
+        function calculateFocus(profile) {
+            const streakBonus = Math.min((profile.currentStreak || 0) * 5, 50);
+            const practiceBonus = Math.min((profile.totalWorkings || 0) * 2, 50);
+            return Math.min(streakBonus + practiceBonus, 100);
+        }
+        
+        // Calculate days active from oath date
+        function calculateDaysActive(profile) {
+            if (!profile.oathDate) return 0;
+            const oath = new Date(profile.oathDate);
+            const now = new Date();
+            const diff = Math.floor((now - oath) / (1000 * 60 * 60 * 24));
+            return Math.max(diff, 0);
         }
 
         // Save profile
@@ -5149,26 +5427,43 @@ Build herbal/mineral reference library</textarea>
         }
 
         function loadProfileView() {
-            const saved = localStorage.getItem('compactProfile');
+            // Load from rich grimorioProfile
+            const saved = localStorage.getItem('grimorioProfile');
             if (saved) {
                 const data = JSON.parse(saved);
-                const fullName = data.fullName || 'Lord Edmund Ashford';
-                const origin = data.origin || 'English nobleman turned empirical philosopher';
-                const backstory = data.backstory || 'Born into English nobility in the late 13th century...';
+                const fullName = data.scribeName || 'Unnamed Scribe';
+                const motto = data.personalMotto || 'Amo ĉiujn, fidu malmultajn, difektu neniun';
+                const currentFocus = data.currentFocus || 'Beginning the path of the Three Virtues';
+                const origin = data.studiolLocation || 'My Sacred Space';
+                const backstory = data.backstory || '';
+                const patronVirtue = data.patronVirtue === 'thoth' ? '🌙 Thoth' : data.patronVirtue === 'maat' ? '⚖️ Ma\'at' : '⚡ Caerus';
                 
                 document.getElementById('viewFullName').textContent = fullName;
+                document.getElementById('viewPersonalMotto').textContent = motto;
+                document.getElementById('viewCurrentFocus').textContent = currentFocus;
                 document.getElementById('viewOrigin').textContent = origin;
+                document.getElementById('viewPatronVirtue').textContent = patronVirtue;
                 document.getElementById('viewBackstory').textContent = backstory;
+                
+                // Format oath date
+                if (data.oathDate) {
+                    const oathDate = new Date(data.oathDate);
+                    document.getElementById('viewOathDate').textContent = oathDate.toLocaleDateString();
+                }
                 
                 // Also update side profile card
                 document.getElementById('scribeName').textContent = fullName;
                 
                 // Parse goals into list
                 const goalsList = document.getElementById('viewGoals');
-                const goals = (data.goals || '').split('\n').filter(g => g.trim());
-                if (goals.length > 0) {
-                    goalsList.innerHTML = goals.map(goal => `<li>${goal.replace(/^[-•]\s*/, '')}</li>`).join('');
+                const goalsArray = data.goals || [];
+                if (Array.isArray(goalsArray) && goalsArray.length > 0) {
+                    goalsList.innerHTML = goalsArray.map(goal => `<li>${goal.replace(/^[-•]\s*/, '')}</li>`).join('');
                 }
+
+                // Load specializations and journal
+                loadSpecializationsView(data);
+                loadJournalView(data);
             }
             
             // Load profile photo
@@ -5180,13 +5475,32 @@ Build herbal/mineral reference library</textarea>
         }
 
         function loadProfileEdit() {
-            const saved = localStorage.getItem('compactProfile');
+            // Load from rich grimorioProfile
+            const saved = localStorage.getItem('grimorioProfile');
             if (saved) {
                 const data = JSON.parse(saved);
-                document.getElementById('editFullName').value = data.fullName || 'Lord Edmund Ashford';
-                document.getElementById('editOrigin').value = data.origin || 'English nobleman turned empirical philosopher';
+                document.getElementById('editScribeName').value = data.scribeName || 'Unnamed Scribe';
+                document.getElementById('editPersonalMotto').value = data.personalMotto || 'Amo ĉiujn, fidu malmultajn, difektu neniun';
+                document.getElementById('editCurrentFocus').value = data.currentFocus || '';
+                document.getElementById('editStudioloLocation').value = data.studiolLocation || 'My Sacred Space';
+                document.getElementById('editPatronVirtue').value = data.patronVirtue || 'thoth';
                 document.getElementById('editBackstory').value = data.backstory || '';
-                document.getElementById('editGoals').value = data.goals || '';
+                
+                // Parse oath date if available
+                if (data.oathDate) {
+                    const oathDate = new Date(data.oathDate);
+                    const dateStr = oathDate.toISOString().split('T')[0];
+                    document.getElementById('editOathDate').value = dateStr;
+                }
+                
+                // Parse goals into text area (one per line)
+                const goalsArray = data.goals || [];
+                if (Array.isArray(goalsArray)) {
+                    document.getElementById('editGoals').value = goalsArray.join('\n');
+                }
+
+                // Load journal reflection
+                document.getElementById('editJournalReflection').value = data.journalReflection || '';
             }
             
             // Load profile photo in edit mode
@@ -5194,6 +5508,110 @@ Build herbal/mineral reference library</textarea>
             if (photo) {
                 document.getElementById('editProfilePhotoPreview').innerHTML = `<img src="${photo}" alt="Profile Photo">`;
             }
+        }
+
+        // Function to update view mode after saving
+        function loadProfileIntoViewMode(data) {
+            const fullName = data.scribeName || 'Unnamed Scribe';
+            const motto = data.personalMotto || 'Amo ĉiujn, fidu malmultajn, difektu neniun';
+            const currentFocus = data.currentFocus || 'Beginning the path of the Three Virtues';
+            const origin = data.studiolLocation || 'My Sacred Space';
+            const backstory = data.backstory || '';
+            const patronVirtue = data.patronVirtue === 'thoth' ? '🌙 Thoth' : data.patronVirtue === 'maat' ? '⚖️ Ma\'at' : '⚡ Caerus';
+            
+            document.getElementById('viewFullName').textContent = fullName;
+            document.getElementById('viewPersonalMotto').textContent = motto;
+            document.getElementById('viewCurrentFocus').textContent = currentFocus;
+            document.getElementById('viewOrigin').textContent = origin;
+            document.getElementById('viewPatronVirtue').textContent = patronVirtue;
+            document.getElementById('viewBackstory').textContent = backstory;
+            document.getElementById('scribeName').textContent = fullName;
+            
+            // Format oath date
+            if (data.oathDate) {
+                const oathDate = new Date(data.oathDate);
+                document.getElementById('viewOathDate').textContent = oathDate.toLocaleDateString();
+            }
+            
+            // Parse goals into list
+            const goalsList = document.getElementById('viewGoals');
+            const goalsArray = data.goals || [];
+            if (Array.isArray(goalsArray) && goalsArray.length > 0) {
+                goalsList.innerHTML = goalsArray.map(goal => `<li>${goal.replace(/^[-•]\s*/, '')}</li>`).join('');
+            }
+            
+            // Display specializations and journal
+            loadSpecializationsView(data);
+            loadJournalView(data);
+        }
+
+        // Display specializations in view mode
+        function loadSpecializationsView(data) {
+            const journeymanThreshold = 500;
+            const isJourneyman = (data.totalPoints || 0) >= journeymanThreshold;
+            const specContainer = document.getElementById('profileSpecializations');
+            
+            if (!specContainer) return;
+            
+            const specs = [
+                {id: 'herbalist', name: '🌿 Herbalist', desc: 'Master of botanical essences and plant lore'},
+                {id: 'astrologer', name: '🌙 Astrologer', desc: 'Reader of celestial omens and lunar cycles'},
+                {id: 'alchemist', name: '⚗️ Alchemist', desc: 'Transmuter of base materials and essences'},
+                {id: 'guardian', name: '⚔️ Guardian', desc: 'Protector against dark forces and ill intent'},
+                {id: 'scholar', name: '📚 Scholar', desc: 'Keeper of ancient wisdom and hidden lore'},
+                {id: 'polyglot', name: '🗣️ Polyglot', desc: 'Master of tongues and linguistic arts'}
+            ];
+            
+            const specGrid = specContainer.querySelector('#specGrid') || specContainer;
+            
+            specGrid.innerHTML = specs.map(spec => {
+                const specData = data.specializations?.[spec.id] || {unlocked: false, progress: 0};
+                const locked = !isJourneyman && !specData.unlocked;
+                const progress = specData.progress || 0;
+                
+                return `
+                    <div class="spec-card ${locked ? 'locked' : 'unlocked'}" data-spec="${spec.id}">
+                        <div class="spec-header">
+                            <span class="spec-icon">${spec.name.split(' ')[0]}</span>
+                            <div class="spec-info">
+                                <div class="spec-title">${spec.name}</div>
+                                <div class="spec-status">${locked ? '🔒 Locked' : '✓ Unlocked'}</div>
+                            </div>
+                        </div>
+                        <p class="spec-description">${spec.desc}</p>
+                        ${!locked ? `<div class="spec-progress"><div class="progress-bar" style="width: ${progress}%"></div></div>` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            // Show specializations section if unlocked
+            if (isJourneyman) {
+                specContainer.style.display = 'block';
+            }
+        }
+
+        // Display journal in view mode
+        function loadJournalView(data) {
+            const journalContainer = document.getElementById('journalText');
+            if (!journalContainer) return;
+            
+            const reflection = data.journalReflection || 'No reflections yet. Begin your journey by recording your thoughts and insights here.';
+            journalContainer.textContent = reflection;
+            
+            // Show the journal section if there's data
+            const journalSection = document.getElementById('profileJournal');
+            if (journalSection) {
+                journalSection.style.display = 'block';
+            }
+        }
+
+        // Save journal reflection standalone
+        function saveJournalReflection() {
+            const richProfile = JSON.parse(localStorage.getItem('grimorioProfile') || '{}');
+            richProfile.journalReflection = document.getElementById('editJournal').value.trim() || richProfile.journalReflection || '';
+            localStorage.setItem('grimorioProfile', JSON.stringify(richProfile));
+            alert('📓 Reflection saved!');
+            loadJournalView(richProfile);
         }
 
         // Profile Photo Functions
@@ -5227,37 +5645,61 @@ Build herbal/mineral reference library</textarea>
         }
 
         function saveProfileChanges() {
-            const profileData = {
-                fullName: document.getElementById('editFullName').value.trim(),
-                origin: document.getElementById('editOrigin').value.trim(),
-                backstory: document.getElementById('editBackstory').value.trim(),
-                goals: document.getElementById('editGoals').value.trim()
-            };
+            // Load existing profile or create new one
+            let profileData = loadProfile();
+            const richProfile = JSON.parse(localStorage.getItem('grimorioProfile') || '{}');
             
-            localStorage.setItem('compactProfile', JSON.stringify(profileData));
+            // Update core profile fields
+            richProfile.scribeName = document.getElementById('editScribeName').value.trim() || richProfile.scribeName || 'Unnamed Scribe';
+            richProfile.personalMotto = document.getElementById('editPersonalMotto').value.trim() || richProfile.personalMotto || 'Amo ĉiujn, fidu malmultajn, difektu neniun';
+            richProfile.currentFocus = document.getElementById('editCurrentFocus').value.trim() || richProfile.currentFocus || 'Beginning the path of the Three Virtues';
+            richProfile.studiolLocation = document.getElementById('editStudioloLocation').value.trim() || richProfile.studiolLocation || 'My Sacred Space';
+            richProfile.patronVirtue = document.getElementById('editPatronVirtue').value || richProfile.patronVirtue || 'thoth';
+            richProfile.backstory = document.getElementById('editBackstory').value.trim() || richProfile.backstory || '';
             
-            // Also update the side profile card name
-            if (profileData.fullName) {
-                document.getElementById('scribeName').textContent = profileData.fullName;
+            // Save journal reflection from Quill editor
+            richProfile.journalReflection = getJournalContent() || richProfile.journalReflection || '';
+            
+            // Parse oath date
+            const oathDateInput = document.getElementById('editOathDate').value;
+            if (oathDateInput) {
+                richProfile.oathDate = new Date(oathDateInput).toISOString();
+            }
+            
+            // Parse goals
+            const goalsText = document.getElementById('editGoals').value.trim();
+            if (goalsText) {
+                richProfile.goals = goalsText.split('\n').filter(g => g.trim());
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('grimorioProfile', JSON.stringify(richProfile));
+            
+            // Update displayed name
+            if (richProfile.scribeName) {
+                document.getElementById('scribeName').textContent = richProfile.scribeName;
             }
             
             alert('✨ Profile saved!');
             
-            // Switch back to view mode
+            // Switch back to view mode and update display
             toggleProfileEdit();
+            loadProfileIntoViewMode(richProfile);
+            loadSpecializationsView(richProfile);
+            loadJournalView(richProfile);
         }
 
         // Notes Functions
         function saveNote() {
             const category = document.getElementById('noteCategory').value;
-            const content = document.getElementById('noteContent').value.trim();
+            const content = getNoteContent();
             
             if (!category) {
                 alert('Please select a category');
                 return;
             }
             
-            if (!content) {
+            if (!content || content === '{"ops":[]}') {
                 alert('Please write a note');
                 return;
             }
@@ -5275,7 +5717,7 @@ Build herbal/mineral reference library</textarea>
             
             // Clear form
             document.getElementById('noteCategory').value = '';
-            document.getElementById('noteContent').value = '';
+            if (noteEditor) noteEditor.setContents([]);
             
             // Reload notes display
             loadNotesCompact();
@@ -5304,13 +5746,37 @@ Build herbal/mineral reference library</textarea>
             
             container.innerHTML = notes.slice(0, 10).map(note => {
                 const date = new Date(note.date);
+                // Parse rich text content if it's JSON (Quill format), otherwise treat as plain text
+                let displayContent = note.content;
+                try {
+                    const parsed = JSON.parse(note.content);
+                    if (parsed.ops) {
+                        // Convert Quill Delta to HTML
+                        displayContent = parsed.ops.map(op => {
+                            if (op.insert) {
+                                let text = String(op.insert).replace(/\n/g, '<br>');
+                                if (op.attributes) {
+                                    if (op.attributes.bold) text = `<strong>${text}</strong>`;
+                                    if (op.attributes.italic) text = `<em>${text}</em>`;
+                                    if (op.attributes.underline) text = `<u>${text}</u>`;
+                                }
+                                return text;
+                            }
+                            return '';
+                        }).join('');
+                    }
+                } catch (e) {
+                    // Not JSON, use as-is
+                    displayContent = note.content.replace(/\n/g, '<br>');
+                }
+                
                 return `
                     <div class="note-item-compact" id="note-${note.id}">
                         <div class="note-header-compact">
                             <div class="note-date-compact">${date.toLocaleDateString()} ${date.toLocaleTimeString()}</div>
                             <div class="note-category-compact">${categoryEmoji[note.category] || '📝'} ${note.category}</div>
                         </div>
-                        <div class="note-content-compact" id="content-${note.id}" contenteditable="false">${note.content.replace(/\n/g, '<br>')}</div>
+                        <div class="note-content-compact" id="content-${note.id}" contenteditable="false">${displayContent}</div>
                         <div class="note-actions-compact">
                             <button class="note-edit-compact" onclick="editNoteCompact(${note.id})">✏️ Edit</button>
                             <button class="note-delete-compact" onclick="deleteNoteCompact(${note.id})">🗑️ Delete</button>
@@ -5455,6 +5921,62 @@ Build herbal/mineral reference library</textarea>
             updateToolkitProgress();
         }
 
+        // Quill Editor Instances
+        let journalEditor = null;
+        let noteEditor = null;
+
+        // Initialize Quill Rich Text Editors
+        function initializeQuillEditors() {
+            // Journal Reflection Editor
+            journalEditor = new Quill('#editJournalReflection', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        ['blockquote'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link']
+                    ]
+                },
+                placeholder: 'Write your thoughts about your journey through the Three Virtues...'
+            });
+
+            // Note Editor
+            noteEditor = new Quill('#noteContentEditor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        ['blockquote'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['code-block'],
+                        ['link']
+                    ]
+                },
+                placeholder: 'Write your note...'
+            });
+
+            // Load saved reflection into journal editor
+            const saved = localStorage.getItem('grimorioProfile');
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (data.journalReflection) {
+                    journalEditor.setContents(JSON.parse(data.journalReflection));
+                }
+            }
+        }
+
+        // Update save functions to use Quill content
+        function getJournalContent() {
+            if (!journalEditor) return '';
+            return JSON.stringify(journalEditor.getContents());
+        }
+
+        function getNoteContent() {
+            if (!noteEditor) return '';
+            return JSON.stringify(noteEditor.getContents());
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             const profile = loadProfile();
@@ -5463,8 +5985,14 @@ Build herbal/mineral reference library</textarea>
             // Initialize dashboard section on page load
             switchSection('dashboard');
             
-            // Load profile view mode
+            // Load profile view mode (this updates the profile card with real data)
             loadProfileView();
+            
+            // Load profile edit mode data
+            loadProfileEdit();
+
+            // Initialize Quill Rich Text Editors
+            initializeQuillEditors();
             
             // Check if auto-sync is enabled
             if (localStorage.getItem('autoSyncEnabled') === 'true') {

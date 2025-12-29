@@ -49,6 +49,94 @@ class GrimorioRPG {
                     specializations: []
                 }
             },
+
+            // Specializations System
+            specializations: {
+                herbalist: {
+                    id: 'herbalist',
+                    name: '🌿 Herbalist',
+                    icon: '🌿',
+                    virtue: 'thoth',
+                    description: 'Master of botanical essences and plant lore',
+                    unlocked: false,
+                    progress: 0,
+                    mastery: 0,
+                    unlockedAt: null,
+                    skills: [],
+                    itemsCreated: [],
+                    experienceGained: 0
+                },
+                astrologer: {
+                    id: 'astrologer',
+                    name: '🌙 Astrologer',
+                    icon: '🌙',
+                    virtue: 'caerus',
+                    description: 'Reader of celestial omens and lunar cycles',
+                    unlocked: false,
+                    progress: 0,
+                    mastery: 0,
+                    unlockedAt: null,
+                    skills: [],
+                    readingsPerformed: 0,
+                    experienceGained: 0
+                },
+                alchemist: {
+                    id: 'alchemist',
+                    name: '⚗️ Alchemist',
+                    icon: '⚗️',
+                    virtue: 'thoth',
+                    description: 'Transmuter of base materials and essences',
+                    unlocked: false,
+                    progress: 0,
+                    mastery: 0,
+                    unlockedAt: null,
+                    skills: [],
+                    transmutationsPerformed: 0,
+                    experienceGained: 0
+                },
+                guardian: {
+                    id: 'guardian',
+                    name: '⚔️ Guardian',
+                    icon: '⚔️',
+                    virtue: 'maat',
+                    description: 'Protector against dark forces and ill intent',
+                    unlocked: false,
+                    progress: 0,
+                    mastery: 0,
+                    unlockedAt: null,
+                    skills: [],
+                    protectionsCreated: 0,
+                    experienceGained: 0
+                },
+                scholar: {
+                    id: 'scholar',
+                    name: '📚 Scholar',
+                    icon: '📚',
+                    virtue: 'thoth',
+                    description: 'Keeper of ancient wisdom and hidden lore',
+                    unlocked: false,
+                    progress: 0,
+                    mastery: 0,
+                    unlockedAt: null,
+                    skills: [],
+                    volumesRead: 0,
+                    experienceGained: 0
+                },
+                polyglot: {
+                    id: 'polyglot',
+                    name: '🗣️ Polyglot',
+                    icon: '🗣️',
+                    virtue: 'caerus',
+                    description: 'Master of tongues and linguistic arts',
+                    unlocked: false,
+                    progress: 0,
+                    mastery: 0,
+                    unlockedAt: null,
+                    skills: [],
+                    languagesLearned: [],
+                    experienceGained: 0
+                }
+            },
             
             // RPG Progression
             achievements: [],
@@ -167,6 +255,98 @@ class GrimorioRPG {
             this.character.title = currentRank.title;
             this.unlockAchievement(`rank_${currentRank.name.toLowerCase()}`);
         }
+
+        // Check specialization unlock conditions
+        this.checkSpecializationUnlocks();
+    }
+
+    // Specializations System
+    checkSpecializationUnlocks() {
+        const journeymanThreshold = 1500; // Journeyman rank
+        const masterThreshold = 7500; // Master rank
+
+        for (const specId in this.character.specializations) {
+            const spec = this.character.specializations[specId];
+            
+            if (spec.unlocked) continue;
+            
+            // Unlock at Journeyman rank
+            if (this.character.totalExperience >= journeymanThreshold) {
+                this.unlockSpecialization(specId, 'rank_reached');
+            }
+        }
+    }
+
+    unlockSpecialization(specId, reason = 'manual') {
+        const spec = this.character.specializations[specId];
+        if (!spec || spec.unlocked) return false;
+
+        spec.unlocked = true;
+        spec.unlockedAt = new Date().toISOString();
+        spec.progress = 0;
+        spec.mastery = 0;
+
+        this.unlockAchievement(`specialization_${specId}_unlocked`);
+        console.log(`🔓 Specialization Unlocked: ${spec.name}`);
+
+        this.saveCharacter();
+        return true;
+    }
+
+    awardSpecializationExperience(specId, amount, skillName = '') {
+        const spec = this.character.specializations[specId];
+        if (!spec) return false;
+
+        spec.experienceGained += amount;
+        
+        // Progress calculation (0-100)
+        const progressPerLevel = 250; // 250 XP per level (0-4 levels = 1000 XP max)
+        spec.progress = Math.min(100, (spec.experienceGained % progressPerLevel) / progressPerLevel * 100);
+        
+        // Mastery calculation (0-100, increases with overall specialization practice)
+        spec.mastery = Math.min(100, spec.experienceGained / 1000 * 100);
+
+        if (skillName && !spec.skills.includes(skillName)) {
+            spec.skills.push(skillName);
+        }
+
+        this.saveCharacter();
+        return true;
+    }
+
+    getSpecializationLevel(specId) {
+        const spec = this.character.specializations[specId];
+        if (!spec) return 0;
+
+        return Math.floor(spec.experienceGained / 250) + 1;
+    }
+
+    getSpecializationStatus(specId) {
+        const spec = this.character.specializations[specId];
+        if (!spec) return null;
+
+        return {
+            id: specId,
+            name: spec.name,
+            icon: spec.icon,
+            virtue: spec.virtue,
+            description: spec.description,
+            unlocked: spec.unlocked,
+            level: this.getSpecializationLevel(specId),
+            progress: spec.progress,
+            mastery: spec.mastery,
+            experienceGained: spec.experienceGained,
+            skills: spec.skills,
+            unlockedAt: spec.unlockedAt
+        };
+    }
+
+    getAllSpecializations() {
+        const specs = [];
+        for (const specId in this.character.specializations) {
+            specs.push(this.getSpecializationStatus(specId));
+        }
+        return specs;
     }
 
     // Quest System

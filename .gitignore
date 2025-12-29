@@ -1,3 +1,32 @@
 files.zip
 COMPLETE_DELIVERY_SUMMARY.md
 DESKTOP_LAYOUT_GUIDE.md
+# Standalone pages (replaced by dashboard.html consolidation)
+profile.html
+profile-imgbb-auto.html
+quests.html
+logger.html
+achievements.html
+index.html
+
+# Embedded volume files (source is in volumes/ directory)
+files/
+
+# Old/reference content
+inspo/
+volumes/
+
+# System and cache files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+node_modules/
+
+# Keep only essential files for dashboard
+# ✓ dashboard.html - main application
+# ✓ css/ - styling
+# ✓ js/ - rpg-system.js
+# ✓ README.md - documentation
