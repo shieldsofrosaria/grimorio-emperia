@@ -83,6 +83,28 @@
             }
         }
 
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
         /* Top Navigation */
         .top-nav {
             background: linear-gradient(135deg, rgba(26, 15, 46, 0.95), rgba(74, 44, 109, 0.95));
@@ -2447,6 +2469,108 @@
             color: var(--caerus-gold);
         }
 
+        /* Quest System Styles */
+        .quest-section {
+            margin-bottom: 30px;
+        }
+
+        .quest-section-header {
+            font-size: 1.3rem;
+            color: var(--caerus-gold);
+            font-family: 'Cinzel', serif;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--mystic-purple);
+        }
+
+        .quest-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .quest-card {
+            background: linear-gradient(135deg, rgba(45, 27, 78, 0.4), rgba(74, 44, 109, 0.2));
+            border: 2px solid var(--mystic-purple);
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .quest-card:hover {
+            border-color: var(--caerus-gold);
+            box-shadow: 0 5px 20px rgba(218, 165, 32, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .quest-card.completed {
+            opacity: 0.6;
+            border-color: var(--maat-silver);
+        }
+
+        .quest-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .quest-title {
+            font-size: 1.1rem;
+            color: var(--caerus-gold);
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+        }
+
+        .quest-virtue {
+            font-size: 1.5rem;
+        }
+
+        .quest-description {
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .quest-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .quest-reward {
+            color: var(--caerus-bright);
+            font-weight: 600;
+        }
+
+        .quest-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: var(--caerus-gold);
+        }
+
+        .quest-timer {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .quest-timer-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .quest-timer-value {
+            color: var(--caerus-gold);
+            font-size: 1.5rem;
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+        }
+
         /* Quill Rich Text Editor Styling */
         .ql-toolbar {
             background: rgba(0, 0, 0, 0.4) !important;
@@ -2903,6 +3027,47 @@
                         <!-- Notes Display -->
                         <div class="notes-compact" id="notesCompact">
                             <!-- Notes will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Quests Tab -->
+                    <div id="questsTabContent" class="main-tab-content">
+                        <h3 class="activity-title">⭐ Quests & Challenges</h3>
+
+                        <!-- Daily Quests -->
+                        <div class="quest-section">
+                            <div class="quest-section-header">📅 Daily Quests</div>
+                            <div class="quest-timer">
+                                <div class="quest-timer-label">Resets in</div>
+                                <div class="quest-timer-value" id="dailyTimer">--:--:--</div>
+                            </div>
+                            <div class="quest-grid" id="dailyQuests">
+                                <!-- Daily quests will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Weekly Quests -->
+                        <div class="quest-section">
+                            <div class="quest-section-header">📆 Weekly Quests</div>
+                            <div class="quest-timer">
+                                <div class="quest-timer-label">Resets in</div>
+                                <div class="quest-timer-value" id="weeklyTimer">--:--:--</div>
+                            </div>
+                            <div class="quest-grid" id="weeklyQuests">
+                                <!-- Weekly quests will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Monthly Quests -->
+                        <div class="quest-section">
+                            <div class="quest-section-header">📊 Monthly Quests</div>
+                            <div class="quest-timer">
+                                <div class="quest-timer-label">Resets in</div>
+                                <div class="quest-timer-value" id="monthlyTimer">--:--:--</div>
+                            </div>
+                            <div class="quest-grid" id="monthlyQuests">
+                                <!-- Monthly quests will be populated here -->
+                            </div>
                         </div>
                     </div>
 
@@ -4915,6 +5080,7 @@
                 { id: 'workingLog', label: '🌿 Working Log' }
             ],
             'practice': [
+                { id: 'quests', label: '⭐ Quests' },
                 { id: 'toolkit', label: '🛠️ Toolkit' },
                 { id: 'moon', label: '🌙 Moon Tracker' },
                 { id: 'sigilGen', label: '✨ Sigil Generator' },
@@ -5906,6 +6072,271 @@
             updateCategoryCount(category);
         }
 
+        // Quest System Functions
+        function initializeQuestSystem() {
+            checkQuestResets();
+            loadAllQuests();
+            startQuestTimers();
+        }
+
+        function checkQuestResets() {
+            const now = new Date();
+            const questProgress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            
+            // Check daily reset (midnight)
+            const lastDailyReset = questProgress.lastDailyReset ? new Date(questProgress.lastDailyReset) : null;
+            if (!lastDailyReset || now.toDateString() !== lastDailyReset.toDateString()) {
+                questProgress.completedDaily = [];
+                questProgress.lastDailyReset = now.toISOString();
+            }
+            
+            // Check weekly reset (Monday at midnight)
+            const lastWeeklyReset = questProgress.lastWeeklyReset ? new Date(questProgress.lastWeeklyReset) : null;
+            const weekStart = getWeekStart(now);
+            if (!lastWeeklyReset || weekStart.toDateString() !== getWeekStart(lastWeeklyReset).toDateString()) {
+                questProgress.completedWeekly = [];
+                questProgress.lastWeeklyReset = now.toISOString();
+            }
+            
+            // Check monthly reset (1st of month at midnight)
+            const lastMonthlyReset = questProgress.lastMonthlyReset ? new Date(questProgress.lastMonthlyReset) : null;
+            if (!lastMonthlyReset || now.getMonth() !== lastMonthlyReset.getMonth() || now.getFullYear() !== lastMonthlyReset.getFullYear()) {
+                questProgress.completedMonthly = [];
+                questProgress.lastMonthlyReset = now.toISOString();
+            }
+            
+            localStorage.setItem('questProgress', JSON.stringify(questProgress));
+        }
+
+        function getWeekStart(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+            return new Date(d.setDate(diff));
+        }
+
+        function loadAllQuests() {
+            loadQuests('daily', getQuestData().daily);
+            loadQuests('weekly', getQuestData().weekly);
+            loadQuests('monthly', getQuestData().monthly);
+        }
+
+        function getQuestData() {
+            return {
+                daily: [
+                    {
+                        id: 'daily-study',
+                        name: 'Morning Study',
+                        description: 'Read and take notes for at least 15 minutes',
+                        virtue: 'thoth',
+                        emoji: '🌙',
+                        experience: 10
+                    },
+                    {
+                        id: 'daily-practice',
+                        name: 'Daily Practice',
+                        description: 'Complete one working or ritual practice',
+                        virtue: 'maat',
+                        emoji: '⚖️',
+                        experience: 10
+                    },
+                    {
+                        id: 'daily-journal',
+                        name: 'Reflection Journal',
+                        description: 'Write a journal entry about your progress',
+                        virtue: 'caerus',
+                        emoji: '⚡',
+                        experience: 10
+                    }
+                ],
+                weekly: [
+                    {
+                        id: 'weekly-volumes',
+                        name: 'Volume Reading',
+                        description: 'Complete reading one full volume',
+                        virtue: 'thoth',
+                        emoji: '🌙',
+                        experience: 50
+                    },
+                    {
+                        id: 'weekly-cleansing',
+                        name: 'Cleansing Ritual',
+                        description: 'Perform a cleansing or balancing ritual',
+                        virtue: 'maat',
+                        emoji: '⚖️',
+                        experience: 50
+                    },
+                    {
+                        id: 'weekly-moon',
+                        name: 'Lunar Observation',
+                        description: 'Track moon phases and planetary hours',
+                        virtue: 'caerus',
+                        emoji: '⚡',
+                        experience: 50
+                    }
+                ],
+                monthly: [
+                    {
+                        id: 'monthly-mastery',
+                        name: 'Path of Mastery',
+                        description: 'Practice daily for 20+ days this month',
+                        virtue: 'thoth',
+                        emoji: '🌙',
+                        experience: 150
+                    },
+                    {
+                        id: 'monthly-balance',
+                        name: 'Balanced Practice',
+                        description: 'Complete quests in all three virtues',
+                        virtue: 'maat',
+                        emoji: '⚖️',
+                        experience: 150
+                    },
+                    {
+                        id: 'monthly-timing',
+                        name: 'Perfect Timing',
+                        description: 'Complete 10 workings during optimal planetary hours',
+                        virtue: 'caerus',
+                        emoji: '⚡',
+                        experience: 150
+                    }
+                ]
+            };
+        }
+
+        function loadQuests(frequency, quests) {
+            const container = document.getElementById(`${frequency}Quests`);
+            if (!container) return;
+            
+            const questProgress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            const completedKey = `completed${frequency.charAt(0).toUpperCase() + frequency.slice(1)}`;
+            const completed = questProgress[completedKey] || [];
+            
+            container.innerHTML = quests.map(quest => {
+                const isCompleted = completed.includes(quest.id);
+                return `
+                    <div class="quest-card ${isCompleted ? 'completed' : ''}" data-quest-id="${quest.id}">
+                        <div class="quest-header">
+                            <div class="quest-title">${quest.name}</div>
+                            <div class="quest-virtue">${quest.emoji}</div>
+                        </div>
+                        <div class="quest-description">${quest.description}</div>
+                        <div class="quest-footer">
+                            <div class="quest-reward">+${quest.experience} ${quest.virtue.toUpperCase()} XP</div>
+                            <input 
+                                type="checkbox" 
+                                class="quest-checkbox" 
+                                ${isCompleted ? 'checked disabled' : ''}
+                                onchange="completeQuest('${frequency}', '${quest.id}', '${quest.virtue}', ${quest.experience})"
+                            >
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function completeQuest(frequency, questId, virtue, experience) {
+            const questProgress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            const completedKey = `completed${frequency.charAt(0).toUpperCase() + frequency.slice(1)}`;
+            
+            if (!questProgress[completedKey]) {
+                questProgress[completedKey] = [];
+            }
+            
+            // Add to completed list
+            questProgress[completedKey].push(questId);
+            localStorage.setItem('questProgress', JSON.stringify(questProgress));
+            
+            // Award experience using rpg-system.js
+            if (window.grimorioRPG) {
+                window.grimorioRPG.awardExperience(virtue, experience);
+            }
+            
+            // Update UI
+            const card = document.querySelector(`[data-quest-id="${questId}"]`);
+            if (card) {
+                card.classList.add('completed');
+                const checkbox = card.querySelector('.quest-checkbox');
+                checkbox.disabled = true;
+            }
+            
+            // Show success message
+            showQuestNotification(`Quest Complete! +${experience} ${virtue.toUpperCase()} XP`);
+            
+            // Refresh dashboard display
+            const profile = loadProfile();
+            updateUI(profile);
+        }
+
+        function showQuestNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, var(--thoth-deep), var(--mystic-purple));
+                color: var(--caerus-gold);
+                padding: 15px 25px;
+                border-radius: 8px;
+                border: 2px solid var(--caerus-gold);
+                font-family: 'Cinzel', serif;
+                font-size: 1.1rem;
+                z-index: 10000;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+                animation: slideInRight 0.5s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.5s ease';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        function startQuestTimers() {
+            updateQuestTimers();
+            setInterval(updateQuestTimers, 1000);
+        }
+
+        function updateQuestTimers() {
+            const now = new Date();
+            
+            // Daily timer (until midnight)
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            updateTimer('dailyTimer', tomorrow - now);
+            
+            // Weekly timer (until next Monday)
+            const nextMonday = new Date(now);
+            const daysUntilMonday = (8 - nextMonday.getDay()) % 7 || 7;
+            nextMonday.setDate(nextMonday.getDate() + daysUntilMonday);
+            nextMonday.setHours(0, 0, 0, 0);
+            updateTimer('weeklyTimer', nextMonday - now);
+            
+            // Monthly timer (until 1st of next month)
+            const nextMonth = new Date(now);
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            nextMonth.setDate(1);
+            nextMonth.setHours(0, 0, 0, 0);
+            updateTimer('monthlyTimer', nextMonth - now);
+        }
+
+        function updateTimer(elementId, ms) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const hours = Math.floor(ms / (1000 * 60 * 60));
+            const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+            
+            element.textContent = `${hours}h ${minutes}m ${seconds}s`;
+        }
+
         function updateToolkitProgress() {
             const allItems = document.querySelectorAll('.checklist-item-compact');
             const checkedItems = Array.from(allItems).filter(item => {
@@ -6024,6 +6455,9 @@
 
             // Initialize Quill Rich Text Editors
             initializeQuillEditors();
+            
+            // Initialize Quest System
+            initializeQuestSystem();
             
             // Check if auto-sync is enabled
             if (localStorage.getItem('autoSyncEnabled') === 'true') {
