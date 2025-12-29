@@ -3106,31 +3106,36 @@
                         </div>
 
                         <!-- Reflection Journal Sub-tab -->
-                        <div id="reflectionSubTab" class="profile-sub-content" style="display: none;">
+                        <div id="reflectionSubTab" class="profile-sub-content" style="display: none; padding: 20px;">
                             <h3 class="activity-title">📓 In-Character Reflection</h3>
                             
-                            <!-- Reflection View -->
-                            <div id="reflectionViewMode" style="margin-bottom: 30px;">
-                                <div style="background: rgba(26, 35, 50, 0.6); padding: 20px; border-radius: 10px; border-left: 4px solid var(--caerus-bright); margin-bottom: 15px;">
-                                    <p id="reflectionText" style="font-style: italic; color: var(--maat-bright); line-height: 1.8; min-height: 100px;">
-                                        No reflection yet. Share your thoughts about your journey through the Three Virtues.
+                            <!-- Display Mode -->
+                            <div id="reflectionDisplay" style="margin-bottom: 20px;">
+                                <div style="background: rgba(26, 35, 50, 0.6); padding: 20px; border-radius: 10px; border-left: 4px solid var(--caerus-bright); margin-bottom: 15px; min-height: 80px;">
+                                    <p id="reflectionTextDisplay" style="font-style: italic; color: var(--maat-bright); line-height: 1.8;">
+                                        No reflection yet. Click 'Edit Reflection' to begin.
                                     </p>
                                 </div>
-                                <button class="save-btn-compact" onclick="toggleReflectionEdit()">✏️ Edit Reflection</button>
+                                <button class="save-btn-compact" onclick="document.getElementById('reflectionDisplay').style.display='none'; document.getElementById('reflectionEditor').style.display='block'; loadReflectionForEdit();">✏️ Edit Reflection</button>
                             </div>
 
-                            <!-- Reflection Edit -->
-                            <div id="reflectionEditMode" style="display: none;">
-                                <div class="editor-toolbar">
-                                    <button onclick="formatJournal('bold')" title="Bold"><strong>B</strong></button>
-                                    <button onclick="formatJournal('italic')" title="Italic"><em>I</em></button>
-                                    <button onclick="formatJournal('underline')" title="Underline"><u>U</u></button>
-                                    <button onclick="formatJournal('strikethrough')" title="Strikethrough"><s>S</s></button>
-                                    <button onclick="formatJournal('removeFormat')" title="Clear Format">✕ Format</button>
+                            <!-- Edit Mode -->
+                            <div id="reflectionEditor" style="display: none;">
+                                <div style="margin-bottom: 12px;">
+                                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Formatting Options:</label>
+                                    <div class="editor-toolbar">
+                                        <button onclick="formatReflection('bold')" title="Bold"><strong>B</strong></button>
+                                        <button onclick="formatReflection('italic')" title="Italic"><em>I</em></button>
+                                        <button onclick="formatReflection('underline')" title="Underline"><u>U</u></button>
+                                        <button onclick="formatReflection('strikethrough')" title="Strikethrough"><s>S</s></button>
+                                        <button onclick="formatReflection('removeFormat')" title="Clear Format">✕ Clear</button>
+                                    </div>
                                 </div>
-                                <div class="editor-content" id="reflectionEditor" contenteditable="true" placeholder="Write your in-character reflection..." style="margin-bottom: 15px;"></div>
-                                <button class="save-btn-compact" onclick="saveReflectionJournal()" style="margin-right: 8px;">💾 Save</button>
-                                <button class="save-btn-compact" onclick="toggleReflectionEdit()" style="background: rgba(192, 208, 232, 0.3);">✕ Cancel</button>
+                                <div class="editor-content" id="reflectionTextEditor" contenteditable="true" style="margin-bottom: 15px; min-height: 200px;"></div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="save-btn-compact" onclick="saveReflectionJournal()">💾 Save Reflection</button>
+                                    <button class="save-btn-compact" onclick="document.getElementById('reflectionEditor').style.display='none'; document.getElementById('reflectionDisplay').style.display='block';" style="background: rgba(192, 208, 232, 0.3);">✕ Cancel</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -6217,44 +6222,32 @@
             
             // Load reflection content when switching to reflection tab
             if (tabName === 'reflection') {
-                loadReflectionContent();
+                loadReflectionForView();
             }
         }
 
         // Toggle reflection journal edit mode
-        function toggleReflectionEdit() {
-            const viewMode = document.getElementById('reflectionViewMode');
-            const editMode = document.getElementById('reflectionEditMode');
-            
-            if (editMode.style.display === 'none') {
-                viewMode.style.display = 'none';
-                editMode.style.display = 'block';
-                // Load current reflection into editor
-                const profile = loadProfile();
-                if (profile.journalReflection) {
-                    document.getElementById('reflectionEditor').innerHTML = profile.journalReflection;
-                }
-                document.getElementById('reflectionEditor').focus();
+        // Load reflection for editing
+        function loadReflectionForEdit() {
+            const profile = loadProfile();
+            const editor = document.getElementById('reflectionTextEditor');
+            if (profile.journalReflection) {
+                editor.innerHTML = profile.journalReflection;
             } else {
-                editMode.style.display = 'none';
-                viewMode.style.display = 'block';
+                editor.innerHTML = '';
             }
+            editor.focus();
         }
 
-        // Load reflection content
-        function loadReflectionContent() {
-            const profile = loadProfile();
-            const reflectionText = document.getElementById('reflectionText');
-            if (profile.journalReflection && profile.journalReflection.trim()) {
-                reflectionText.innerHTML = profile.journalReflection;
-            } else {
-                reflectionText.innerHTML = 'No reflection yet. Share your thoughts about your journey through the Three Virtues.';
-            }
+        // Format reflection with contenteditable
+        function formatReflection(command) {
+            document.execCommand(command, false, null);
+            document.getElementById('reflectionTextEditor').focus();
         }
 
         // Save reflection journal
         function saveReflectionJournal() {
-            const content = document.getElementById('reflectionEditor').innerHTML.trim();
+            const content = document.getElementById('reflectionTextEditor').innerHTML.trim();
             if (!content || content === '<br>') {
                 alert('Please write something in your reflection.');
                 return;
@@ -6264,31 +6257,63 @@
             profile.journalReflection = content;
             localStorage.setItem('grimorioProfile', JSON.stringify(profile));
             
-            alert('📓 Reflection saved!');
-            addActivityFeedItem('📓', 'Updated reflection journal', 'Reflection saved');
-            loadReflectionContent();
-            toggleReflectionEdit();
+            alert('📓 Reflection saved successfully!');
+            addActivityFeedItem('📓', 'Updated reflection journal', 'Journal entry saved');
+            
+            // Switch back to display mode
+            document.getElementById('reflectionTextDisplay').innerHTML = content;
+            document.getElementById('reflectionEditor').style.display = 'none';
+            document.getElementById('reflectionDisplay').style.display = 'block';
         }
+
+        // Load reflection content for viewing
+        function loadReflectionForView() {
+            const profile = loadProfile();
+            const display = document.getElementById('reflectionTextDisplay');
+            if (profile.journalReflection && profile.journalReflection.trim()) {
+                display.innerHTML = profile.journalReflection;
+            } else {
+                display.innerHTML = 'No reflection yet. Click "Edit Reflection" to begin.';
+            }
+        }
+
 
         // Update Progress Display in Progress Tab
         function updateProgressDisplay() {
             const profile = loadProfile();
             
-            // Calculate progress percentages based on levels
-            const maxLevel = 6;
-            const thothPercent = Math.min((profile.thoth.level / maxLevel) * 100, 100);
-            const maatPercent = Math.min((profile.maat.level / maxLevel) * 100, 100);
-            const caerusPercent = Math.min((profile.caerus.level / maxLevel) * 100, 100);
+            // Safely update displays with fallbacks
+            const updateElement = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value || '0';
+            };
             
-            // Update displays
-            document.getElementById('progressThoth').textContent = profile.thoth.points;
-            document.getElementById('progressThothBar').style.width = thothPercent + '%';
+            const updateBar = (id, percent) => {
+                const el = document.getElementById(id);
+                if (el) el.style.width = (percent || 0) + '%';
+            };
             
-            document.getElementById('progressMaat').textContent = profile.maat.points;
-            document.getElementById('progressMaatBar').style.width = maatPercent + '%';
+            // Calculate progress percentages based on current level progress
+            const maxPointsPerLevel = 100; // Points needed per level
+            const thothPercent = ((profile.thoth.points % maxPointsPerLevel) / maxPointsPerLevel) * 100;
+            const maatPercent = ((profile.maat.points % maxPointsPerLevel) / maxPointsPerLevel) * 100;
+            const caerusPercent = ((profile.caerus.points % maxPointsPerLevel) / maxPointsPerLevel) * 100;
             
-            document.getElementById('progressCaerus').textContent = profile.caerus.points;
-            document.getElementById('progressCaerusBar').style.width = caerusPercent + '%';
+            // Update displays with points and levels
+            updateElement('progressThoth', `${profile.thoth.points} pts (Lv ${profile.thoth.level})`);
+            updateBar('progressThothBar', thothPercent);
+            
+            updateElement('progressMaat', `${profile.maat.points} pts (Lv ${profile.maat.level})`);
+            updateBar('progressMaatBar', maatPercent);
+            
+            updateElement('progressCaerus', `${profile.caerus.points} pts (Lv ${profile.caerus.level})`);
+            updateBar('progressCaerusBar', caerusPercent);
+            
+            console.log('Progress display updated:', {
+                thoth: { points: profile.thoth.points, level: profile.thoth.level, percent: thothPercent },
+                maat: { points: profile.maat.points, level: profile.maat.level, percent: maatPercent },
+                caerus: { points: profile.caerus.points, level: profile.caerus.level, percent: caerusPercent }
+            });
         }
 
         function toggleCategory(categoryId) {
@@ -6332,6 +6357,7 @@
             if (!lastDailyReset || now.toDateString() !== lastDailyReset.toDateString()) {
                 questProgress.completedDaily = [];
                 questProgress.lastDailyReset = now.toISOString();
+                console.log('Daily quests reset');
             }
             
             // Check weekly reset (Monday at midnight)
@@ -6340,6 +6366,7 @@
             if (!lastWeeklyReset || weekStart.toDateString() !== getWeekStart(lastWeeklyReset).toDateString()) {
                 questProgress.completedWeekly = [];
                 questProgress.lastWeeklyReset = now.toISOString();
+                console.log('Weekly quests reset');
             }
             
             // Check monthly reset (1st of month at midnight)
@@ -6347,9 +6374,11 @@
             if (!lastMonthlyReset || now.getMonth() !== lastMonthlyReset.getMonth() || now.getFullYear() !== lastMonthlyReset.getFullYear()) {
                 questProgress.completedMonthly = [];
                 questProgress.lastMonthlyReset = now.toISOString();
+                console.log('Monthly quests reset');
             }
             
             localStorage.setItem('questProgress', JSON.stringify(questProgress));
+            return questProgress;
         }
 
         function getWeekStart(date) {
@@ -6478,11 +6507,16 @@
 
         function loadQuests(frequency, quests) {
             const container = document.getElementById(`${frequency}Quests`);
-            if (!container) return;
+            if (!container) {
+                console.warn(`Quest container not found: ${frequency}Quests`);
+                return;
+            }
             
             const questProgress = JSON.parse(localStorage.getItem('questProgress') || '{}');
             const completedKey = `completed${frequency.charAt(0).toUpperCase() + frequency.slice(1)}`;
             const completed = questProgress[completedKey] || [];
+            
+            console.log(`Loading ${frequency} quests:`, { total: quests.length, completed: completed.length });
             
             container.innerHTML = quests.map(quest => {
                 const isCompleted = completed.includes(quest.id);
@@ -6508,6 +6542,8 @@
         }
 
         function completeQuest(frequency, questId, virtue, experience) {
+            console.log('Completing quest:', { frequency, questId, virtue, experience });
+            
             const questProgress = JSON.parse(localStorage.getItem('questProgress') || '{}');
             const completedKey = `completed${frequency.charAt(0).toUpperCase() + frequency.slice(1)}`;
             
@@ -6518,6 +6554,7 @@
             // Add to completed list
             questProgress[completedKey].push(questId);
             localStorage.setItem('questProgress', JSON.stringify(questProgress));
+            console.log('Quest progress saved:', questProgress);
             
             // Award experience: prefer rpg-system.js, otherwise fallback locally
             if (window.grimorioRPG && typeof window.grimorioRPG.awardExperience === 'function') {
@@ -6541,7 +6578,10 @@
             if (card) {
                 card.classList.add('completed');
                 const checkbox = card.querySelector('.quest-checkbox');
-                checkbox.disabled = true;
+                if (checkbox) {
+                    checkbox.disabled = true;
+                    checkbox.checked = true;
+                }
             }
             
             // Show success message
