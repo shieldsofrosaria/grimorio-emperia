@@ -2828,6 +2828,8 @@
                         <h3 class="activity-title">⭐ Daily Quests & Challenges</h3>
                         <div id="debugBadge" class="debug-badge">🐞 Debug: initializing…</div>
                         <button id="debugCompleteDailyBtn" class="debug-action-btn" onclick="completeAllDailyQuestsDebug()">Complete all daily quests</button>
+                        <button id="debugCompleteWeeklyBtn" class="debug-action-btn" onclick="completeAllWeeklyQuestsDebug()">Complete all weekly quests</button>
+                        <button id="debugCompleteMonthlyBtn" class="debug-action-btn" onclick="completeAllMonthlyQuestsDebug()">Complete all monthly quests</button>
                         
                         <!-- Daily Quests -->
                         <div class="quest-section">
@@ -5824,6 +5826,8 @@
             richProfile.journalReflection = document.getElementById('editJournal').value.trim() || richProfile.journalReflection || '';
             localStorage.setItem('grimorioProfile', JSON.stringify(richProfile));
             alert('📓 Reflection saved!');
+            // Add to activity feed
+            addActivityFeedItem('📓', 'Saved journal reflection', 'Journal updated');
             loadJournalView(richProfile);
         }
 
@@ -5894,6 +5898,10 @@
             }
             
             alert('✨ Profile saved!');
+            // Activity item for journal save (if content present)
+            if (richProfile.journalReflection && richProfile.journalReflection !== '{}') {
+                addActivityFeedItem('📓', 'Updated journal reflection', 'Profile changes');
+            }
             
             // Switch back to view mode and update display
             toggleProfileEdit();
@@ -5936,6 +5944,7 @@
             loadNotesCompact();
             
             alert('✨ Note saved!');
+            addActivityFeedItem('📝', 'Added study note', `${category} category`);
         }
 
         function loadNotesCompact() {
@@ -6318,6 +6327,48 @@
             });
         }
 
+        // Debug-only helper: complete all weekly quests quickly
+        function completeAllWeeklyQuestsDebug() {
+            if (!isDebugEnabled()) {
+                alert('Enable 🐞 Debug to use test actions.');
+                return;
+            }
+            const questData = getQuestData();
+            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            const completedWeekly = progress.completedWeekly || [];
+            const toComplete = questData.weekly.filter(q => !completedWeekly.includes(q.id));
+            if (toComplete.length === 0) {
+                showQuestNotification('All weekly quests already completed.');
+                return;
+            }
+            toComplete.forEach((q, idx) => {
+                setTimeout(() => {
+                    completeQuest('weekly', q.id, q.virtue, q.experience);
+                }, idx * 250);
+            });
+        }
+
+        // Debug-only helper: complete all monthly quests quickly
+        function completeAllMonthlyQuestsDebug() {
+            if (!isDebugEnabled()) {
+                alert('Enable 🐞 Debug to use test actions.');
+                return;
+            }
+            const questData = getQuestData();
+            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            const completedMonthly = progress.completedMonthly || [];
+            const toComplete = questData.monthly.filter(q => !completedMonthly.includes(q.id));
+            if (toComplete.length === 0) {
+                showQuestNotification('All monthly quests already completed.');
+                return;
+            }
+            toComplete.forEach((q, idx) => {
+                setTimeout(() => {
+                    completeQuest('monthly', q.id, q.virtue, q.experience);
+                }, idx * 300);
+            });
+        }
+
         function showQuestNotification(message) {
             // Create notification element
             const notification = document.createElement('div');
@@ -6500,10 +6551,14 @@
         function updateDebugBadge(status) {
             const badge = document.getElementById('debugBadge');
             const debugBtn = document.getElementById('debugCompleteDailyBtn');
+            const debugWeeklyBtn = document.getElementById('debugCompleteWeeklyBtn');
+            const debugMonthlyBtn = document.getElementById('debugCompleteMonthlyBtn');
             if (!badge) return;
             if (!isDebugEnabled()) {
                 badge.style.display = 'none';
                 if (debugBtn) debugBtn.style.display = 'none';
+                if (debugWeeklyBtn) debugWeeklyBtn.style.display = 'none';
+                if (debugMonthlyBtn) debugMonthlyBtn.style.display = 'none';
                 return;
             }
             const q = status && status.questsInitialized ? '✓' : '…';
@@ -6511,6 +6566,8 @@
             badge.textContent = `🐞 Debug: Quests ${q} • Activity ${a}`;
             badge.style.display = 'inline-block';
             if (debugBtn) debugBtn.style.display = 'inline-block';
+            if (debugWeeklyBtn) debugWeeklyBtn.style.display = 'inline-block';
+            if (debugMonthlyBtn) debugMonthlyBtn.style.display = 'inline-block';
         }
 
         function updateCategoryCount(categoryId) {
