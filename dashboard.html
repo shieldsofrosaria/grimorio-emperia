@@ -4325,8 +4325,39 @@
 
         // Load profile and convert from rich schema to dashboard format
         function loadProfile() {
-            const saved = localStorage.getItem('grimorioProfile');
-            if (!saved) return defaultProfile;
+            let saved = localStorage.getItem('grimorioProfile');
+            
+            // Initialize empty profile if none exists
+            if (!saved) {
+                const emptyProfile = {
+                    scribeName: 'Unnamed Scribe',
+                    overallRank: 1,
+                    totalPoints: 0,
+                    totalWorkings: 0,
+                    currentStreak: 0,
+                    longestStreak: 0,
+                    oathDate: new Date().toISOString(),
+                    thoth: { points: 0, level: 1 },
+                    maat: { points: 0, level: 1 },
+                    caerus: { points: 0, level: 1 },
+                    specializations: {
+                        herbalist: { unlocked: false, progress: 0 },
+                        astrologer: { unlocked: false, progress: 0 },
+                        alchemist: { unlocked: false, progress: 0 },
+                        guardian: { unlocked: false, progress: 0 },
+                        scholar: { unlocked: false, progress: 0 },
+                        polyglot: { unlocked: false, progress: 0 }
+                    },
+                    goals: [],
+                    backstory: '',
+                    personalMotto: 'Amo ĉiujn, fidu malmultajn, difektu neniun',
+                    currentFocus: 'Beginning the path of the Three Virtues',
+                    studiolLocation: 'My Sacred Space',
+                    patronVirtue: 'thoth'
+                };
+                localStorage.setItem('grimorioProfile', JSON.stringify(emptyProfile));
+                saved = JSON.stringify(emptyProfile);
+            }
             
             const richProfile = JSON.parse(saved);
             
