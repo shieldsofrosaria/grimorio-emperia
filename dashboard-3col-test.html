@@ -8,418 +8,548 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@400;600&family=MedievalSharp&display=swap');
 
-        // ==================== RPG SYSTEM (SPEC-ALIGNED) ====================
-
-        const RPG_STORAGE_KEY = 'rpg_character';
-        let characterData = getDefaultCharacter();
-
-        // --- Character Data (spec compliant) ---
-        function getDefaultCharacter() {
-            return {
-                level: 1,
-                xp: 0,
-                xpToNext: 100,
-                virtues: {
-                    thoth: 0,
-                    maat: 0,
-                    caerus: 0
-                },
-                specialization: null,
-                unlockedSkills: [],
-                completedQuests: {
-                    daily: {},      // { 'Mon Jan 01 2025_morning-meditation': true }
-                    weekly: {},     // { 'week_2845_full': true }
-                    monthly: {},    // { 'month_11_2025': true }
-                    caerus: []
-                },
-                achievements: [],
-                stats: {
-                    workingsCompleted: 0,
-                    studySessions: 0,
-                    daysActive: 0,
-                    lastActiveDate: null
-                }
-            };
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        function recomputeXpToNext(level) {
-            return Math.floor(100 * Math.pow(1.2, Math.max(level, 1) - 1));
+        :root {
+            /* Dark mystical palette */
+            --void-black: #0a0514;
+            --deep-purple: #1a0f2e;
+            --mystic-purple: #2d1b4e;
+            --royal-purple: #4a2c6d;
+            --arcane-blue: #2a4a7d;
+            --celestial-blue: #3d6ba3;
+            
+            /* Virtue colors */
+            --thoth-blue: #4a7dc7;
+            --maat-silver: #c0d0e8;
+            --caerus-gold: #daa520;
+            
+            /* Accent colors */
+            --mystic-glow: #8b6fd8;
+            --arcane-glow: #6ba3ff;
+            --gold-glow: #ffd700;
+            --text-primary: #e8f0ff;
+            --text-secondary: #a8b8d8;
         }
 
-        function loadCharacterData() {
-            const saved = localStorage.getItem(RPG_STORAGE_KEY);
-            const legacySaved = !saved && localStorage.getItem('characterData');
-            const base = saved ? JSON.parse(saved) : legacySaved ? JSON.parse(legacySaved) : getDefaultCharacter();
-
-            const safe = getDefaultCharacter();
-            safe.level = base.level || 1;
-            safe.xp = base.xp || 0;
-            safe.xpToNext = base.xpToNext || recomputeXpToNext(safe.level);
-            safe.virtues = { ...safe.virtues, ...(base.virtues || {}) };
-            safe.specialization = base.specialization || null;
-            safe.unlockedSkills = Array.isArray(base.unlockedSkills) ? base.unlockedSkills : [];
-            safe.completedQuests = {
-                daily: { ...(base.completedQuests?.daily || {}) },
-                weekly: { ...(base.completedQuests?.weekly || {}) },
-                monthly: { ...(base.completedQuests?.monthly || {}) },
-                caerus: Array.isArray(base.completedQuests?.caerus) ? base.completedQuests.caerus : []
-            };
-            safe.achievements = Array.isArray(base.achievements) ? base.achievements : [];
-            safe.stats = {
-                ...safe.stats,
-                ...(base.stats || {}),
-                workingsCompleted: base.stats?.workingsCompleted ?? base.stats?.totalWorkings ?? 0
-            };
-            characterData = safe;
-            saveCharacterData();
-            return safe;
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: linear-gradient(135deg, var(--void-black) 0%, var(--deep-purple) 50%, var(--void-black) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        function saveCharacterData() {
-            if (!characterData.xpToNext) {
-                characterData.xpToNext = recomputeXpToNext(characterData.level || 1);
+        /* Animated starfield background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, white, transparent),
+                radial-gradient(2px 2px at 60% 70%, var(--thoth-blue), transparent),
+                radial-gradient(1px 1px at 50% 50%, var(--caerus-gold), transparent),
+                radial-gradient(1px 1px at 80% 10%, var(--maat-silver), transparent),
+                radial-gradient(2px 2px at 90% 60%, var(--arcane-glow), transparent);
+            background-size: 200% 200%;
+            animation: twinkle 4s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(139, 111, 216, 0.3),
+                            inset 0 0 30px rgba(139, 111, 216, 0.1);
             }
-            localStorage.setItem(RPG_STORAGE_KEY, JSON.stringify(characterData));
-        }
-
-        // --- Quest Definitions (spec) ---
-        const dailyQuestTemplates = [
-            {
-                id: 'morning-meditation',
-                name: 'Morning Meditation',
-                description: 'Spend 10 minutes in quiet contemplation at your studiolo',
-                virtue: 'thoth',
-                emoji: '🌙',
-                reward: { xp: 50, virtue: 'thoth', vp: 10 }
-            },
-            {
-                id: 'study-session',
-                name: 'Study Session',
-                description: 'Read and document learnings from one of your volumes',
-                virtue: 'thoth',
-                emoji: '📖',
-                reward: { xp: 75, virtue: 'thoth', vp: 15 }
-            },
-            {
-                id: 'document-working',
-                name: 'Document a Working',
-                description: 'Perform and record a working in your grimoire',
-                virtue: 'maat',
-                emoji: '✨',
-                reward: { xp: 100, virtue: 'maat', vp: 20 }
-            }
-        ];
-
-        const weeklyTemplatesByPhase = {
-            new: [
-                { id: 'weekly-new-intentions', name: 'New Moon Intentions', description: 'Set intentions for the lunar cycle and document them', virtue: 'caerus', emoji: '🌑', reward: { xp: 200, virtue: 'caerus', vp: 40 } },
-                { id: 'weekly-new-study', name: 'Thoth\'s Wisdom', description: 'Study lunar cycles and their timing significance', virtue: 'thoth', emoji: '📚', reward: { xp: 150, virtue: 'thoth', vp: 30 } },
-                { id: 'weekly-new-balance', name: 'New Beginning Balance', description: 'Practice cleansing and preparation workings', virtue: 'maat', emoji: '⚖️', reward: { xp: 150, virtue: 'maat', vp: 30 } }
-            ],
-            waxing: [
-                { id: 'weekly-waxing-growth', name: 'Waxing Growth', description: 'Perform a growth or attraction working during waxing moon', virtue: 'maat', emoji: '🌓', reward: { xp: 150, virtue: 'maat', vp: 30 } },
-                { id: 'weekly-waxing-opportunity', name: 'Opportunity Rising', description: 'Act on a timed opportunity during waxing moon', virtue: 'caerus', emoji: '⚡', reward: { xp: 200, virtue: 'caerus', vp: 40 } },
-                { id: 'weekly-waxing-study', name: 'Growing Knowledge', description: 'Document advancement in your magical studies', virtue: 'thoth', emoji: '📖', reward: { xp: 150, virtue: 'thoth', vp: 30 } }
-            ],
-            full: [
-                { id: 'weekly-full-power', name: 'Full Moon Power', description: 'Charge talismans or perform peak energy working at full moon', virtue: 'caerus', emoji: '🌕', reward: { xp: 250, virtue: 'caerus', vp: 50 } },
-                { id: 'weekly-full-illumination', name: 'Full Moon Illumination', description: 'Record revelations and insights gained this cycle', virtue: 'thoth', emoji: '💎', reward: { xp: 200, virtue: 'thoth', vp: 40 } },
-                { id: 'weekly-full-balance', name: 'Peak Balance', description: 'Perform a balanced working under full moon', virtue: 'maat', emoji: '⚡', reward: { xp: 200, virtue: 'maat', vp: 40 } }
-            ],
-            waning: [
-                { id: 'weekly-waning-release', name: 'Waning Release', description: 'Perform banishing or purification during waning moon', virtue: 'maat', emoji: '🌗', reward: { xp: 150, virtue: 'maat', vp: 30 } },
-                { id: 'weekly-waning-cleansing', name: 'Deep Cleansing', description: 'Complete a thorough cleansing ritual', virtue: 'maat', emoji: '🌊', reward: { xp: 200, virtue: 'maat', vp: 50 } },
-                { id: 'weekly-waning-study', name: 'Banishing Knowledge', description: 'Study techniques for removing unwanted influences', virtue: 'thoth', emoji: '🔪', reward: { xp: 150, virtue: 'thoth', vp: 30 } }
-            ]
-        };
-
-        const monthlyQuestTemplates = [
-            {
-                id: 'monthly-dedication',
-                name: 'Path of Dedication',
-                description: 'Complete 20 daily quests this month',
-                virtue: 'thoth',
-                emoji: '📚',
-                reward: { xp: 500, virtue: 'thoth', vp: 100 }
-            },
-            {
-                id: 'monthly-mastery',
-                name: 'Mastery Pursuit',
-                description: 'Perform 10 documented workings this month',
-                virtue: 'maat',
-                emoji: '⚖️',
-                reward: { xp: 750, virtue: 'maat', vp: 150 }
-            },
-            {
-                id: 'monthly-balanced',
-                name: 'Balanced Scribe',
-                description: 'Reach 100 points in all three virtues',
-                virtue: 'caerus',
-                emoji: '✨',
-                reward: { xp: 750, virtue: 'caerus', vp: 150 }
-            }
-        ];
-
-        // --- Time helpers ---
-        function getTodayKey() {
-            return new Date().toDateString();
-        }
-
-        function getWeekKey() {
-            const week = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
-            const phase = getMoonPhase();
-            return `week_${week}_${phase}`;
-        }
-
-        function getMonthKey() {
-            const now = new Date();
-            return `month_${now.getMonth()}_${now.getFullYear()}`;
-        }
-
-        // --- Moon phase ---
-        function getMoonPhase(date = new Date()) {
-            const knownNewMoon = new Date(2000, 0, 6);
-            const lunarCycle = 29.53058867;
-            const daysSince = (date - knownNewMoon) / (1000 * 60 * 60 * 24);
-            const phasePct = ((daysSince % lunarCycle) / lunarCycle) * 100;
-            if (phasePct < 12.5 || phasePct >= 87.5) return 'new';
-            if (phasePct < 37.5) return 'waxing';
-            if (phasePct < 62.5) return 'full';
-            return 'waning';
-        }
-
-        function getWeeklyQuestTemplates() {
-            return weeklyTemplatesByPhase[getMoonPhase()] || weeklyTemplatesByPhase.new;
-        }
-
-        // --- XP / VP helpers ---
-        function addXP(amount) {
-            characterData.xp += amount;
-            while (characterData.xp >= characterData.xpToNext) {
-                characterData.xp -= characterData.xpToNext;
-                characterData.level += 1;
-                characterData.xpToNext = recomputeXpToNext(characterData.level);
-            }
-            saveCharacterData();
-        }
-
-        function addVirtuePoints(virtue, amount) {
-            const v = String(virtue).toLowerCase();
-            if (!characterData.virtues[v]) characterData.virtues[v] = 0;
-            const before = characterData.virtues[v];
-            const after = before + amount;
-            characterData.virtues[v] = after;
-            // Virtue rank bonus: +25 XP per new rank crossed (every 100 VP)
-            const beforeRank = Math.floor(before / 100);
-            const afterRank = Math.floor(after / 100);
-            if (afterRank > beforeRank) {
-                addXP(25 * (afterRank - beforeRank));
+            50% { 
+                box-shadow: 0 0 30px rgba(139, 111, 216, 0.6),
+                            inset 0 0 40px rgba(139, 111, 216, 0.2);
             }
         }
 
-        // --- Quest helpers ---
-        function getQuestTemplates(frequency) {
-            if (frequency === 'daily') return dailyQuestTemplates;
-            if (frequency === 'weekly') return getWeeklyQuestTemplates();
-            if (frequency === 'monthly') return monthlyQuestTemplates;
-            return [];
-        }
-
-        function makeQuestKey(frequency, questId) {
-            if (frequency === 'daily') return `${getTodayKey()}_${questId}`;
-            if (frequency === 'weekly') return `${getWeekKey()}_${questId}`;
-            if (frequency === 'monthly') return `${getMonthKey()}_${questId}`;
-            return questId;
-        }
-
-        function isQuestCompleted(frequency, questId) {
-            const key = makeQuestKey(frequency, questId);
-            if (frequency === 'daily') return Boolean(characterData.completedQuests.daily[key]);
-            if (frequency === 'weekly') return Boolean(characterData.completedQuests.weekly[key]);
-            if (frequency === 'monthly') return Boolean(characterData.completedQuests.monthly[key]);
-            return false;
-        }
-
-        // --- UI Renders ---
-        function initializeQuestSystem() {
-            loadCharacterData();
-            syncRPGToProfile();
-            renderQuests('daily');
-            renderQuests('weekly');
-            renderQuests('monthly');
-            startQuestTimers();
-            window.__debug = window.__debug || {};
-            window.__debug.questsInitialized = true;
-            updateDebugBadge(window.__debug);
-        }
-
-        function renderQuests(frequency) {
-            const templates = getQuestTemplates(frequency);
-            const container = document.getElementById(`${frequency}QuestsList`);
-            if (!container) return;
-
-            container.innerHTML = templates.map(quest => {
-                const completed = isQuestCompleted(frequency, quest.id);
-                return `
-                    <div class="quest-card ${completed ? 'completed' : ''}" data-quest-id="${quest.id}">
-                        <input type="checkbox" class="quest-checkbox" ${completed ? 'checked disabled' : ''} onchange="completeQuest('${frequency}', '${quest.id}')">
-                        <div class="quest-card-content">
-                            <div class="quest-card-title">${quest.emoji} ${quest.name}</div>
-                            <div class="quest-card-description">${quest.description}</div>
-                            <div class="quest-card-reward">
-                                <div class="quest-card-reward-item">
-                                    <span style="font-weight: 600; color: var(--caerus-gold);">+${quest.reward.xp}</span>
-                                    <span>${quest.reward.virtue.toUpperCase()} | +${quest.reward.vp} VP</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            updateQuestProgress(frequency, templates);
-        }
-
-        function countCompletionsForWindow(frequency, templates) {
-            if (frequency === 'daily') {
-                const today = getTodayKey();
-                return templates.filter(q => characterData.completedQuests.daily[`${today}_${q.id}`]).length;
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
             }
-            if (frequency === 'weekly') {
-                const wk = getWeekKey();
-                return templates.filter(q => characterData.completedQuests.weekly[`${wk}_${q.id}`]).length;
-            }
-            if (frequency === 'monthly') {
-                const mk = getMonthKey();
-                return templates.filter(q => characterData.completedQuests.monthly[`${mk}_${q.id}`]).length;
-            }
-            return 0;
-        }
-
-        function updateQuestProgress(frequency, templates) {
-            const completed = countCompletionsForWindow(frequency, templates);
-            const total = templates.length;
-            const progressBar = document.getElementById(`${frequency}ProgressBar`);
-            const countDisplay = document.getElementById(`${frequency}QuestCount`);
-            const rewardText = document.getElementById(`${frequency}RewardText`);
-            if (progressBar) progressBar.style.width = total ? `${(completed / total) * 100}%` : '0%';
-            if (countDisplay) countDisplay.textContent = `${completed} / ${total}`;
-            if (rewardText) {
-                rewardText.textContent = completed === total && total > 0 ? '✨ All quests complete!' : '';
+            to {
+                transform: translateX(0);
+                opacity: 1;
             }
         }
 
-        // --- Quest Completion ---
-        function completeQuest(frequency, questId) {
-            const templates = getQuestTemplates(frequency);
-            const quest = templates.find(q => q.id === questId);
-            if (!quest) return;
-
-            loadCharacterData();
-            if (isQuestCompleted(frequency, questId)) return; // already done in this window
-
-            const key = makeQuestKey(frequency, questId);
-            if (frequency === 'daily') characterData.completedQuests.daily[key] = true;
-            if (frequency === 'weekly') characterData.completedQuests.weekly[key] = true;
-            if (frequency === 'monthly') characterData.completedQuests.monthly[key] = true;
-
-            // Apply rewards
-            addXP(quest.reward.xp);
-            addVirtuePoints(quest.reward.virtue, quest.reward.vp);
-            characterData.stats.workingsCompleted += 1;
-            saveCharacterData();
-            syncRPGToProfile();
-
-            showQuestNotification(`✨ Quest Complete! +${quest.reward.xp} XP, +${quest.reward.vp} ${quest.reward.virtue.toUpperCase()} VP`);
-            renderQuests(frequency);
-            const profile = loadProfile();
-            updateUI(profile);
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
         }
 
-        // Keep grimorioProfile in sync for sidebar UI
-        function syncRPGToProfile() {
-            const rp = JSON.parse(localStorage.getItem('grimorioProfile') || '{}');
-            if (!rp.thoth) rp.thoth = { points: 0, level: 1 };
-            if (!rp.maat) rp.maat = { points: 0, level: 1 };
-            if (!rp.caerus) rp.caerus = { points: 0, level: 1 };
-
-            rp.thoth.points = characterData.virtues.thoth;
-            rp.maat.points = characterData.virtues.maat;
-            rp.caerus.points = characterData.virtues.caerus;
-            rp.thoth.level = Math.floor(rp.thoth.points / 100) + 1;
-            rp.maat.level = Math.floor(rp.maat.points / 100) + 1;
-            rp.caerus.level = Math.floor(rp.caerus.points / 100) + 1;
-            rp.totalPoints = rp.thoth.points + rp.maat.points + rp.caerus.points;
-            rp.totalWorkings = characterData.stats.workingsCompleted;
-
-            localStorage.setItem('grimorioProfile', JSON.stringify(rp));
+        /* Debug Badge */
+        .debug-badge {
+            display: none;
+            margin: 10px 0 0 0;
+            padding: 6px 12px;
+            border: 2px dashed var(--maat-silver);
+            border-radius: 999px;
+            color: var(--maat-glow);
+            background: rgba(255,255,255,0.05);
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            max-width: fit-content;
         }
 
-        function showQuestNotification(message) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: linear-gradient(135deg, var(--thoth-deep), var(--mystic-purple));
-                color: var(--caerus-gold);
-                padding: 15px 25px;
-                border-radius: 8px;
-                border: 2px solid var(--caerus-gold);
-                font-family: 'Cinzel', serif;
-                font-size: 1.1rem;
-                z-index: 10000;
-                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-                animation: slideInRight 0.5s ease;
-            `;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            setTimeout(() => {
-                notification.style.animation = 'slideOutRight 0.5s ease';
-                setTimeout(() => notification.remove(), 500);
-            }, 3000);
+        .debug-action-btn {
+            display: none;
+            margin: 8px 0 16px 0;
+            padding: 6px 10px;
+            border: 2px solid var(--caerus-gold);
+            border-radius: 8px;
+            background: rgba(218, 165, 32, 0.08);
+            color: var(--caerus-gold);
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            cursor: pointer;
         }
 
-        // Debug helpers
-        function completeAllDailyQuestsDebug() {
-            if (!isDebugEnabled()) {
-                alert('Enable 🐞 Debug to use test actions.');
-                return;
-            }
-            const quests = getQuestTemplates('daily').filter(q => !isQuestCompleted('daily', q.id));
-            if (!quests.length) {
-                showQuestNotification('All daily quests already completed.');
-                return;
-            }
-            quests.forEach((q, idx) => setTimeout(() => completeQuest('daily', q.id), idx * 200));
+        .debug-action-btn:hover {
+            background: rgba(218, 165, 32, 0.15);
         }
 
-        function completeAllWeeklyQuestsDebug() {
-            if (!isDebugEnabled()) {
-                alert('Enable 🐞 Debug to use test actions.');
-                return;
-            }
-            const quests = getQuestTemplates('weekly').filter(q => !isQuestCompleted('weekly', q.id));
-            if (!quests.length) {
-                showQuestNotification('All weekly quests already completed.');
-                return;
-            }
-            quests.forEach((q, idx) => setTimeout(() => completeQuest('weekly', q.id), idx * 250));
+        /* Top Navigation */
+        .top-nav {
+            background: linear-gradient(135deg, rgba(26, 15, 46, 0.95), rgba(74, 44, 109, 0.95));
+            border-bottom: 2px solid var(--mystic-glow);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
-        function completeAllMonthlyQuestsDebug() {
-            if (!isDebugEnabled()) {
-                alert('Enable 🐞 Debug to use test actions.');
-                return;
-            }
-            const quests = getQuestTemplates('monthly').filter(q => !isQuestCompleted('monthly', q.id));
-            if (!quests.length) {
-                showQuestNotification('All monthly quests already completed.');
-                return;
-            }
-            quests.forEach((q, idx) => setTimeout(() => completeQuest('monthly', q.id), idx * 300));
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            gap: 20px;
         }
 
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            color: var(--caerus-gold);
+            text-shadow: 0 0 15px var(--gold-glow);
+            white-space: nowrap;
+        }
+
+        .nav-icon {
+            font-size: 1.8rem;
+        }
+
+        .nav-title {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .nav-title {
+                display: inline;
+            }
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.05rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: block;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover {
+            color: var(--caerus-gold);
+            background: rgba(218, 165, 32, 0.1);
+        }
+
+        .nav-link.active {
+            color: var(--caerus-gold);
+            background: rgba(218, 165, 32, 0.2);
+        }
+
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: linear-gradient(135deg, rgba(26, 15, 46, 0.98), rgba(74, 44, 109, 0.98));
+            border: 2px solid var(--mystic-glow);
+            border-radius: 10px;
+            padding: 10px 0;
+            min-width: 280px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+            z-index: 1001;
+            margin-top: 5px;
+            list-style: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown-menu li {
+            padding: 0;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(139, 111, 216, 0.3);
+            color: var(--caerus-gold);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            padding: 8px 14px;
+            background: linear-gradient(135deg, var(--mystic-purple), var(--royal-purple));
+            border: 2px solid var(--mystic-glow);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover {
+            background: linear-gradient(135deg, var(--royal-purple), var(--mystic-glow));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 111, 216, 0.5);
+        }
+
+        .nav-btn.sync-btn.auto-sync-enabled {
+            background: linear-gradient(135deg, var(--caerus-gold), var(--gold-glow));
+            color: var(--void-black);
+            border-color: var(--caerus-gold);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -100% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            min-height: auto;
+        }
+
+        /* 3-Column Layout */
+        .sidebar-nav {
+            width: 280px;
+            background: linear-gradient(180deg, rgba(26, 15, 46, 0.98), rgba(45, 27, 78, 0.95));
+            border-right: 2px solid var(--mystic-glow);
+            padding: 25px 0;
+            overflow-y: auto;
+            flex-shrink: 0;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            max-height: calc(100vh - 80px);
+            position: sticky;
+            top: 80px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .sidebar-nav::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(2px 2px at 30% 20%, rgba(255, 255, 255, 0.2), transparent),
+                              radial-gradient(1px 1px at 70% 60%, rgba(139, 111, 216, 0.2), transparent),
+                              radial-gradient(1px 1px at 40% 80%, rgba(218, 165, 32, 0.2), transparent);
+            background-size: 200% 200%;
+            animation: twinkle 10s ease-in-out infinite;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .sidebar-section {
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar-section-header {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            color: var(--caerus-gold);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            padding: 0 20px 12px;
+            margin-bottom: 8px;
+            border-bottom: 2px solid rgba(218, 165, 32, 0.3);
+            text-shadow: 0 0 8px rgba(218, 165, 32, 0.3);
+        }
+
+        .sidebar-item {
+            padding: 14px 20px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 1rem;
+            font-family: 'Cormorant Garamond', serif;
+            border-left: 3px solid transparent;
+            position: relative;
+        }
+
+        .sidebar-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background: linear-gradient(90deg, rgba(218, 165, 32, 0.2), transparent);
+            transition: width 0.3s ease;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(139, 111, 216, 0.15);
+            border-left-color: var(--mystic-glow);
+            padding-left: 25px;
+            color: var(--maat-silver);
+        }
+
+        .sidebar-item:hover::before {
+            width: 100%;
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(90deg, rgba(218, 165, 32, 0.25), rgba(218, 165, 32, 0.1));
+            border-left-color: var(--caerus-gold);
+            color: var(--caerus-gold);
+            text-shadow: 0 0 10px rgba(218, 165, 32, 0.5);
+            font-weight: 600;
+        }
+
+        .sidebar-item-icon {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .sidebar-nested {
+            padding-left: 20px;
+        }
+
+        .sidebar-nested .sidebar-item {
+            font-size: 0.95rem;
+            padding: 10px 20px;
+        }
+
+        .main-content-area {
+            flex: 1;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(10, 5, 20, 0.4), rgba(26, 15, 46, 0.4));
+            min-width: 0;
+            min-height: auto;
+        }
+
+        .profile-sidebar {
+            width: 350px;
+            background: linear-gradient(180deg, rgba(45, 27, 78, 0.98), rgba(74, 44, 109, 0.95));
+            border-left: 2px solid var(--mystic-glow);
+            padding: 20px;
+            flex-shrink: 0;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            position: sticky;
+            top: 80px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .profile-sidebar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .profile-sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(2px 2px at 20% 30%, rgba(255, 255, 255, 0.3), transparent),
+                              radial-gradient(2px 2px at 60% 70%, rgba(139, 111, 216, 0.3), transparent),
+                              radial-gradient(1px 1px at 50% 50%, rgba(218, 165, 32, 0.3), transparent),
+                              radial-gradient(1px 1px at 80% 10%, rgba(255, 255, 255, 0.2), transparent);
+            background-size: 200% 200%;
+            animation: twinkle 8s ease-in-out infinite;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Sync Status Indicator */
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(45, 27, 78, 0.95);
+            border: 2px solid var(--mystic-glow);
+            border-radius: 10px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            z-index: 999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .sync-status.syncing {
+            border-color: var(--thoth-blue);
+        }
+
+        .sync-status.success {
+            border-color: var(--caerus-gold);
+        }
+
+        .sync-status.error {
+            border-color: #ff6b6b;
+        }
+
+        .sync-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--mystic-glow);
+        }
+
+        .sync-status.syncing .sync-indicator {
+            background: var(--thoth-blue);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .sync-status.success .sync-indicator {
+            background: var(--caerus-gold);
+        }
+
+        .sync-status.error .sync-indicator {
+            background: #ff6b6b;
+        }
+
+        /* Ornate border frame */
+        .main-frame {
+            border: 3px solid var(--mystic-purple);
+            border-radius: 20px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(26, 15, 46, 0.8), rgba(45, 27, 78, 0.6));
+            box-shadow: 
+                0 0 40px rgba(139, 111, 216, 0.3),
+                inset 0 0 60px rgba(139, 111, 216, 0.1);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            position: relative;
         }
 
         .main-frame::before,
@@ -5237,7 +5367,6 @@
         }
 
         let autoSyncTimer = null;
-        let autoSyncPullTimer = null;
 
         // Default profile data
         const defaultProfile = {
@@ -5504,7 +5633,12 @@
 
         // Toggle auto-sync with improved logging and error handling
         function toggleAutoSync() {
-            const configOk = validateConfiguration();
+            if (!validateConfiguration()) {
+                document.getElementById('autoSyncToggle').checked = false;
+                alert('⚠️ Auto-sync cannot be enabled: API key not configured');
+                return;
+            }
+
             const toggle = document.getElementById('autoSyncToggle');
             const status = document.getElementById('autoSyncStatus');
             const info = document.getElementById('autoSyncInfo');
@@ -5512,8 +5646,8 @@
             
             if (toggle.checked) {
                 localStorage.setItem('autoSyncEnabled', 'true');
-                status.textContent = configOk ? 'Enabled' : 'Enabled (local only)';
-                status.style.color = configOk ? 'var(--caerus-gold)' : 'var(--text-secondary)';
+                status.textContent = 'Enabled';
+                status.style.color = 'var(--caerus-gold)';
                 info.style.display = 'block';
                 
                 // Update all sync buttons
@@ -5523,18 +5657,18 @@
                 const deviceId = generateDeviceId();
                 document.getElementById('deviceId').textContent = deviceId;
                 
-                // Start auto-sync if configuration is valid; otherwise stay local-only
-                if (configOk) {
-                    console.log('✓ Auto-sync enabled for device:', deviceId);
-                    syncToCloud();
-                    if (autoSyncTimer) clearInterval(autoSyncTimer);
-                    autoSyncTimer = setInterval(syncToCloud, AUTO_SYNC_INTERVAL);
-                    if (autoSyncPullTimer) clearInterval(autoSyncPullTimer);
-                    autoSyncPullTimer = setInterval(loadFromCloud, AUTO_SYNC_INTERVAL);
-                    alert('✨ Auto-sync enabled! Your profile will sync automatically every 30 seconds.');
-                } else {
-                    console.warn('Auto-sync enabled without JSONBin configuration; running in local-only mode.');
-                }
+                // Start auto-sync immediately
+                console.log('✓ Auto-sync enabled for device:', deviceId);
+                syncToCloud();
+                
+                // Set up auto-sync intervals
+                if (autoSyncTimer) clearInterval(autoSyncTimer);
+                autoSyncTimer = setInterval(syncToCloud, AUTO_SYNC_INTERVAL);
+                
+                // Also check for updates periodically
+                setInterval(loadFromCloud, AUTO_SYNC_INTERVAL);
+                
+                alert('✨ Auto-sync enabled! Your profile will sync automatically every 30 seconds.');
             } else {
                 localStorage.setItem('autoSyncEnabled', 'false');
                 status.textContent = 'Disabled';
@@ -5548,10 +5682,6 @@
                 if (autoSyncTimer) {
                     clearInterval(autoSyncTimer);
                     autoSyncTimer = null;
-                }
-                if (autoSyncPullTimer) {
-                    clearInterval(autoSyncPullTimer);
-                    autoSyncPullTimer = null;
                 }
                 
                 console.log('✗ Auto-sync disabled');
@@ -6946,6 +7076,530 @@
             updateCategoryCount(category);
         }
 
+        // Quest System Functions
+        // ==================== RPG QUEST SYSTEM ====================
+        
+        // Character Data Structure
+        let characterData = {
+            level: 1,
+            xp: 0,
+            xpToNext: 100,
+            virtues: {
+                thoth: 0,
+                maat: 0,
+                caerus: 0
+            },
+            completedQuests: {
+                daily: [],
+                weekly: [],
+                monthly: [],
+                caerus: []
+            },
+            stats: {
+                daysActive: 0,
+                totalWorkings: 0
+            }
+        };
+
+        // Quest Templates
+        // ===== LUNAR PHASE CALCULATOR =====
+        function getMoonPhase(date = new Date()) {
+            // Known new moon: January 6, 2000
+            const knownNewMoon = new Date(2000, 0, 6);
+            const lunarCycle = 29.53058867; // days
+            const daysSinceNewMoon = (date - knownNewMoon) / (1000 * 60 * 60 * 24);
+            const phase = ((daysSinceNewMoon % lunarCycle) / lunarCycle) * 100;
+            
+            // Determine phase name
+            if (phase < 12.5 || phase >= 87.5) return 'new';      // 0-12.5% or 87.5-100%
+            if (phase >= 12.5 && phase < 37.5) return 'waxing';   // 12.5-37.5%
+            if (phase >= 37.5 && phase < 62.5) return 'full';     // 37.5-62.5%
+            if (phase >= 62.5 && phase < 87.5) return 'waning';   // 62.5-87.5%
+        }
+        
+        function getMoonEmoji(phase) {
+            const phaseMap = { new: '🌑', waxing: '🌓', full: '🌕', waning: '🌗' };
+            return phaseMap[phase] || '🌙';
+        }
+        
+        // Get weekly quests based on current moon phase
+        function getWeeklyQuestTemplates() {
+            const phase = getMoonPhase();
+            const templates = {
+                new: [
+                    {
+                        id: 'weekly-new-moon',
+                        name: 'New Moon Intentions 🌑',
+                        description: 'Set intentions for the lunar cycle and document them',
+                        virtue: 'caerus',
+                        emoji: '🌑',
+                        reward: { xp: 200, virtue: 'caerus', vp: 40 }
+                    },
+                    {
+                        id: 'weekly-new-study',
+                        name: 'Thoth\'s Wisdom',
+                        description: 'Study lunar cycles and their timing significance',
+                        virtue: 'thoth',
+                        emoji: '📚',
+                        reward: { xp: 150, virtue: 'thoth', vp: 30 }
+                    },
+                    {
+                        id: 'weekly-new-balance',
+                        name: 'New Beginning Balance',
+                        description: 'Practice cleansing and preparation workings',
+                        virtue: 'maat',
+                        emoji: '⚖️',
+                        reward: { xp: 150, virtue: 'maat', vp: 30 }
+                    }
+                ],
+                waxing: [
+                    {
+                        id: 'weekly-waxing-growth',
+                        name: 'Waxing Growth 🌓',
+                        description: 'Perform a growth or attraction working during waxing moon',
+                        virtue: 'caerus',
+                        emoji: '🌓',
+                        reward: { xp: 200, virtue: 'caerus', vp: 50 }
+                    },
+                    {
+                        id: 'weekly-waxing-study',
+                        name: 'Building Knowledge',
+                        description: 'Document advancement in your magical studies',
+                        virtue: 'thoth',
+                        emoji: '📖',
+                        reward: { xp: 150, virtue: 'thoth', vp: 30 }
+                    },
+                    {
+                        id: 'weekly-waxing-working',
+                        name: 'Manifestation Work',
+                        description: 'Perform growth or attraction workings',
+                        virtue: 'maat',
+                        emoji: '✨',
+                        reward: { xp: 150, virtue: 'maat', vp: 30 }
+                    }
+                ],
+                full: [
+                    {
+                        id: 'weekly-full-power',
+                        name: 'Full Moon Power 🌕',
+                        description: 'Charge talismans or perform peak energy working at full moon',
+                        virtue: 'caerus',
+                        emoji: '🌕',
+                        reward: { xp: 250, virtue: 'caerus', vp: 50 }
+                    },
+                    {
+                        id: 'weekly-full-wisdom',
+                        name: 'Full Moon Illumination',
+                        description: 'Record revelations and insights gained this cycle',
+                        virtue: 'thoth',
+                        emoji: '💎',
+                        reward: { xp: 200, virtue: 'thoth', vp: 40 }
+                    },
+                    {
+                        id: 'weekly-full-working',
+                        name: 'Peak Energy Working',
+                        description: 'Perform your most powerful working at full moon',
+                        virtue: 'maat',
+                        emoji: '⚡',
+                        reward: { xp: 200, virtue: 'maat', vp: 40 }
+                    }
+                ],
+                waning: [
+                    {
+                        id: 'weekly-waning-release',
+                        name: 'Waning Release 🌗',
+                        description: 'Perform banishing or purification during waning moon',
+                        virtue: 'maat',
+                        emoji: '🌗',
+                        reward: { xp: 200, virtue: 'maat', vp: 50 }
+                    },
+                    {
+                        id: 'weekly-waning-study',
+                        name: 'Banishing Knowledge',
+                        description: 'Study techniques for removing unwanted influences',
+                        virtue: 'thoth',
+                        emoji: '🔪',
+                        reward: { xp: 150, virtue: 'thoth', vp: 30 }
+                    },
+                    {
+                        id: 'weekly-waning-cleanse',
+                        name: 'Cleansing Ritual',
+                        description: 'Perform a complete cleansing or purification',
+                        virtue: 'caerus',
+                        emoji: '🌊',
+                        reward: { xp: 150, virtue: 'caerus', vp: 30 }
+                    }
+                ]
+            };
+            return templates[phase] || templates.new;
+        }
+        
+        const dailyQuestTemplates = [
+            {
+                id: 'daily-study',
+                name: 'Morning Meditation',
+                description: 'Spend 10 minutes in quiet contemplation at your studiolo',
+                virtue: 'thoth',
+                emoji: '🌙',
+                reward: { xp: 50, virtue: 'thoth', vp: 10 }
+            },
+            {
+                id: 'daily-practice',
+                name: 'Study Session',
+                description: 'Read and document learnings from one of your volumes',
+                virtue: 'thoth',
+                emoji: '📖',
+                reward: { xp: 75, virtue: 'thoth', vp: 15 }
+            },
+            {
+                id: 'daily-journal',
+                name: 'Document a Working',
+                description: 'Perform and record a working in your grimoire',
+                virtue: 'maat',
+                emoji: '✨',
+                reward: { xp: 100, virtue: 'maat', vp: 20 }
+            }
+        ];
+
+        const monthlyQuestTemplates = [
+            {
+                id: 'monthly-dedication',
+                name: 'Path of Dedication',
+                description: 'Complete 20 daily quests this month',
+                virtue: 'thoth',
+                emoji: '📚',
+                reward: { xp: 500, virtue: 'thoth', vp: 100 }
+            },
+            {
+                id: 'monthly-mastery',
+                name: 'Mastery Pursuit',
+                description: 'Perform 10 documented workings this month',
+                virtue: 'maat',
+                emoji: '⚖️',
+                reward: { xp: 750, virtue: 'maat', vp: 150 }
+            },
+            {
+                id: 'monthly-balance',
+                name: 'Balanced Scribe',
+                description: 'Reach 100 points in all three virtues',
+                virtue: 'caerus',
+                emoji: '✨',
+                reward: { xp: 750, virtue: 'caerus', vp: 150 }
+            }
+        ];
+
+        // Save/Load Character Data
+        function saveCharacterData() {
+            localStorage.setItem('characterData', JSON.stringify(characterData));
+        }
+
+        function loadCharacterData() {
+            const saved = localStorage.getItem('characterData');
+            if (saved) {
+                characterData = JSON.parse(saved);
+            }
+        }
+
+        // Add XP (Exponential formula: 100 * 1.2^(level-1))
+        function addXP(amount) {
+            characterData.xp += amount;
+            while (characterData.xp >= characterData.xpToNext) {
+                characterData.xp -= characterData.xpToNext;
+                characterData.level += 1;
+                // Exponential XP curve: each level requires 1.2x more XP than previous
+                characterData.xpToNext = Math.floor(100 * Math.pow(1.2, characterData.level - 1));
+            }
+            saveCharacterData();
+        }
+
+        // Add Virtue Points
+        function addVirtuePoints(virtue, amount) {
+            const v = String(virtue).toLowerCase().trim();
+            if (['thoth','maat','caerus'].includes(v)) {
+                characterData.virtues[v] += amount;
+            }
+            saveCharacterData();
+        }
+
+        // Get quest template by frequency
+        function getQuestTemplates(frequency) {
+            switch(frequency) {
+                case 'daily': return dailyQuestTemplates;
+                case 'weekly': return getWeeklyQuestTemplates(); // Dynamic based on moon phase
+                case 'monthly': return monthlyQuestTemplates;
+                default: return [];
+            }
+        }
+
+        // Initialize Quest System
+        function initializeQuestSystem() {
+            loadCharacterData();
+            checkQuestResets();
+            // Render all quest types
+            renderQuests('daily');
+            renderQuests('weekly');
+            renderQuests('monthly');
+            startQuestTimers();
+            // Mark debug status
+            window.__debug = window.__debug || {};
+            window.__debug.questsInitialized = true;
+            updateDebugBadge(window.__debug);
+        }
+
+        function checkQuestResets() {
+            const now = new Date();
+            const questProgress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            
+            // Check daily reset (midnight)
+            const lastDailyReset = questProgress.lastDailyReset ? new Date(questProgress.lastDailyReset) : null;
+            if (!lastDailyReset || now.toDateString() !== lastDailyReset.toDateString()) {
+                questProgress.completedDaily = [];
+                questProgress.lastDailyReset = now.toISOString();
+            }
+            
+            // Check weekly reset (Monday at midnight)
+            const lastWeeklyReset = questProgress.lastWeeklyReset ? new Date(questProgress.lastWeeklyReset) : null;
+            const weekStart = getWeekStart(now);
+            if (!lastWeeklyReset || weekStart.toDateString() !== getWeekStart(lastWeeklyReset).toDateString()) {
+                questProgress.completedWeekly = [];
+                questProgress.lastWeeklyReset = now.toISOString();
+            }
+            
+            // Check monthly reset (1st of month at midnight)
+            const lastMonthlyReset = questProgress.lastMonthlyReset ? new Date(questProgress.lastMonthlyReset) : null;
+            if (!lastMonthlyReset || now.getMonth() !== lastMonthlyReset.getMonth() || now.getFullYear() !== lastMonthlyReset.getFullYear()) {
+                questProgress.completedMonthly = [];
+                questProgress.lastMonthlyReset = now.toISOString();
+            }
+            
+            localStorage.setItem('questProgress', JSON.stringify(questProgress));
+        }
+
+        function getWeekStart(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        // Render quests with progression tracking
+        function renderQuests(frequency) {
+            const templates = getQuestTemplates(frequency);
+            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            const completedKey = `completed${frequency.charAt(0).toUpperCase() + frequency.slice(1)}`;
+            const completed = progress[completedKey] || [];
+            
+            const container = document.getElementById(`${frequency}QuestsList`);
+            if (!container) return;
+
+            container.innerHTML = templates.map(quest => {
+                const isCompleted = completed.includes(quest.id);
+                return `
+                    <div class="quest-card ${isCompleted ? 'completed' : ''}" data-quest-id="${quest.id}">
+                        <input 
+                            type="checkbox" 
+                            class="quest-checkbox" 
+                            ${isCompleted ? 'checked disabled' : ''}
+                            onchange="completeQuest('${frequency}', '${quest.id}')"
+                        >
+                        <div class="quest-card-content">
+                            <div class="quest-card-title">${quest.emoji} ${quest.name}</div>
+                            <div class="quest-card-description">${quest.description}</div>
+                            <div class="quest-card-reward">
+                                <div class="quest-card-reward-item">
+                                    <span style="font-weight: 600; color: var(--caerus-gold);">+${quest.reward.xp}</span>
+                                    <span>${quest.reward.virtue.toUpperCase()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Update progress bars
+            updateQuestProgress(frequency, completed.length, templates.length);
+        }
+
+        // Update quest progress bars and display
+        function updateQuestProgress(frequency, completed, total) {
+            const progressBar = document.getElementById(`${frequency}ProgressBar`);
+            const countDisplay = document.getElementById(`${frequency}QuestCount`);
+            const rewardText = document.getElementById(`${frequency}RewardText`);
+            
+            if (progressBar) {
+                const percentage = total > 0 ? (completed / total) * 100 : 0;
+                progressBar.style.width = `${percentage}%`;
+            }
+            
+            if (countDisplay) {
+                countDisplay.textContent = `${completed} / ${total}`;
+            }
+
+            // Show bonus message if all completed
+            if (rewardText && completed === total && total > 0) {
+                const bonusText = {
+                    'daily': '✨ Daily bonus complete! +5 Ma\'at awarded!',
+                    'weekly': '✨ Weekly bonus complete! +10 Thoth awarded!',
+                    'monthly': '✨ Monthly bonus complete! +20 Caerus awarded!'
+                };
+                rewardText.textContent = bonusText[frequency] || 'Bonus pending...';
+                rewardText.style.color = 'var(--caerus-gold)';
+            }
+        }
+
+        // Complete a Quest
+        function completeQuest(frequency, questId) {
+            // Look up quest from templates
+            const templates = getQuestTemplates(frequency);
+            const quest = templates.find(q => q.id === questId);
+            
+            if (!quest) {
+                console.error(`Quest not found: ${questId}`);
+                return;
+            }
+            
+            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            const completedKey = `completed${frequency.charAt(0).toUpperCase() + frequency.slice(1)}`;
+            
+            if (!progress[completedKey]) {
+                progress[completedKey] = [];
+            }
+            
+            // Add to completed list
+            if (!progress[completedKey].includes(questId)) {
+                progress[completedKey].push(questId);
+            }
+            
+            localStorage.setItem('questProgress', JSON.stringify(progress));
+            
+            // Award XP and Virtue Points - use grimorioProfile as single source of truth
+            addXP(quest.reward.xp);
+            
+            // Update rich profile (primary storage)
+            const richProfile = JSON.parse(localStorage.getItem('grimorioProfile') || '{}');
+            if (!richProfile.thoth) richProfile.thoth = { points: 0, level: 1 };
+            if (!richProfile.maat) richProfile.maat = { points: 0, level: 1 };
+            if (!richProfile.caerus) richProfile.caerus = { points: 0, level: 1 };
+            
+            richProfile[quest.reward.virtue].points = (richProfile[quest.reward.virtue].points || 0) + quest.reward.vp;
+            richProfile.totalPoints = (richProfile.totalPoints || 0) + quest.reward.vp;
+            richProfile.totalWorkings = (richProfile.totalWorkings || 0) + 1;
+            richProfile[quest.reward.virtue].level = Math.floor(richProfile[quest.reward.virtue].points / 100) + 1;
+            
+            localStorage.setItem('grimorioProfile', JSON.stringify(richProfile));
+            
+            // Sync to characterData for consistency
+            characterData.virtues[quest.reward.virtue] = richProfile[quest.reward.virtue].points;
+            
+            // Show success message
+            showQuestNotification(`✨ Quest Complete! +${quest.reward.xp} XP, +${quest.reward.vp} ${quest.reward.virtue.toUpperCase()}`);
+            
+            // Re-render quests to update UI
+            renderQuests(frequency);
+            
+            // Update profile display
+            const profile = loadProfile();
+            updateUI(profile);
+        }
+
+        function showQuestNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, var(--thoth-deep), var(--mystic-purple));
+                color: var(--caerus-gold);
+                padding: 15px 25px;
+                border-radius: 8px;
+                border: 2px solid var(--caerus-gold);
+                font-family: 'Cinzel', serif;
+                font-size: 1.1rem;
+                z-index: 10000;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+                animation: slideInRight 0.5s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.5s ease';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        // Debug-only helper: complete all daily quests quickly
+        function completeAllDailyQuestsDebug() {
+            if (!isDebugEnabled()) {
+                alert('Enable 🐞 Debug to use test actions.');
+                return;
+            }
+            const toComplete = dailyQuestTemplates;
+            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            const completedDaily = progress.completedDaily || [];
+            const remaining = toComplete.filter(q => !completedDaily.includes(q.id));
+            
+            if (remaining.length === 0) {
+                showQuestNotification('All daily quests already completed.');
+                return;
+            }
+            
+            remaining.forEach((q, idx) => {
+                setTimeout(() => {
+                    completeQuest('daily', q.id);
+                }, idx * 200);
+            });
+        }
+
+        // Debug-only helper: complete all weekly quests quickly
+        function completeAllWeeklyQuestsDebug() {
+            if (!isDebugEnabled()) {
+                alert('Enable 🐞 Debug to use test actions.');
+                return;
+            }
+            const toComplete = weeklyQuestTemplates;
+            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            const completedWeekly = progress.completedWeekly || [];
+            const remaining = toComplete.filter(q => !completedWeekly.includes(q.id));
+            
+            if (remaining.length === 0) {
+                showQuestNotification('All weekly quests already completed.');
+                return;
+            }
+            
+            remaining.forEach((q, idx) => {
+                setTimeout(() => {
+                    completeQuest('weekly', q.id);
+                }, idx * 250);
+            });
+        }
+
+        // Debug-only helper: complete all monthly quests quickly
+        function completeAllMonthlyQuestsDebug() {
+            if (!isDebugEnabled()) {
+                alert('Enable 🐞 Debug to use test actions.');
+                return;
+            }
+            const toComplete = monthlyQuestTemplates;
+            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            const completedMonthly = progress.completedMonthly || [];
+            const remaining = toComplete.filter(q => !completedMonthly.includes(q.id));
+            
+            if (remaining.length === 0) {
+                showQuestNotification('All monthly quests already completed.');
+                return;
+            }
+            
+            remaining.forEach((q, idx) => {
+                setTimeout(() => {
+                    completeQuest('monthly', q.id);
+                }, idx * 300);
+            });
+        }
+
         function startQuestTimers() {
             updateQuestTimers();
             setInterval(updateQuestTimers, 1000);
@@ -7258,6 +7912,9 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // Clear quest progress for fresh testing
+            localStorage.removeItem('questProgress');
+            
             const profile = loadProfile();
             updateUI(profile);
             
