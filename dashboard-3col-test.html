@@ -3556,7 +3556,12 @@
 
                 <!-- Progress Report Content -->
                 <div id="content-progress" class="content-view" style="display: none;">
-                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); margin-bottom: 30px; text-align: center; text-shadow: 0 0 20px rgba(139, 111, 216, 0.5);">
+                    <!-- Reset Button - Prominent Position -->
+                    <div style="text-align: right; margin-bottom: 15px;">
+                        <button onclick="resetProgress()" style="padding: 12px 24px; background: linear-gradient(135deg, #8b6fd8, #da6a32); border: 2px solid #8b6fd8; color: white; cursor: pointer; border-radius: 8px; font-family: 'Cinzel', serif; font-size: 1rem; font-weight: bold; box-shadow: 0 4px 15px rgba(139, 111, 216, 0.4);">🔄 Reset All Progress</button>
+                    </div>
+                    
+                    <h1 style="font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; color: var(--maat-silver); text-shadow: 0 0 20px rgba(139, 111, 216, 0.5); margin: 0 0 30px 0; text-align: center;">
                         📈 Progress Report
                     </h1>
                     
@@ -3566,38 +3571,31 @@
                         <div style="margin-bottom: 25px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                 <span style="color: var(--thoth-blue); font-weight: bold;">🌙 Thoth (Wisdom)</span>
-                                <span style="color: var(--text-primary);">0 / 100</span>
+                                <span id="progress-thoth-value" style="color: var(--text-primary);">0 pts</span>
                             </div>
                             <div style="background: rgba(0,0,0,0.3); border-radius: 10px; height: 20px; overflow: hidden;">
-                                <div style="background: linear-gradient(90deg, var(--thoth-blue), var(--arcane-glow)); height: 100%; width: 0%;"></div>
+                                <div id="progress-thoth-fill" style="background: linear-gradient(90deg, var(--thoth-blue), var(--arcane-glow)); height: 100%; width: 0%;"></div>
                             </div>
                         </div>
                         
                         <div style="margin-bottom: 25px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                 <span style="color: var(--maat-silver); font-weight: bold;">⚖️ Ma'at (Balance)</span>
-                                <span style="color: var(--text-primary);">0 / 100</span>
+                                <span id="progress-maat-value" style="color: var(--text-primary);">0 pts</span>
                             </div>
                             <div style="background: rgba(0,0,0,0.3); border-radius: 10px; height: 20px; overflow: hidden;">
-                                <div style="background: linear-gradient(90deg, var(--maat-silver), white); height: 100%; width: 0%;"></div>
+                                <div id="progress-maat-fill" style="background: linear-gradient(90deg, var(--maat-silver), white); height: 100%; width: 0%;"></div>
                             </div>
                         </div>
                         
                         <div>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                 <span style="color: var(--caerus-gold); font-weight: bold;">⚡ Caerus (Timing)</span>
-                                <span style="color: var(--text-primary);">0 / 100</span>
+                                <span id="progress-caerus-value" style="color: var(--text-primary);">0 pts</span>
                             </div>
                             <div style="background: rgba(0,0,0,0.3); border-radius: 10px; height: 20px; overflow: hidden;">
-                                <div style="background: linear-gradient(90deg, var(--caerus-gold), var(--gold-glow)); height: 100%; width: 0%;"></div>
+                                <div id="progress-caerus-fill" style="background: linear-gradient(90deg, var(--caerus-gold), var(--gold-glow)); height: 100%; width: 0%;"></div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div style="background: linear-gradient(135deg, rgba(139, 111, 216, 0.2), rgba(218, 165, 32, 0.2)); border: 2px solid var(--mystic-glow); border-radius: 15px; padding: 30px;">
-                        <h3 style="font-family: 'Cinzel', serif; color: var(--caerus-gold); margin-bottom: 20px;">📅 Activity Timeline</h3>
-                        <div style="text-align: center; padding: 20px;">
-                            <p style="color: var(--text-primary); font-style: italic;">Begin your practice to see progress tracked here.</p>
                         </div>
                     </div>
                 </div>
@@ -4167,7 +4165,10 @@
 
                     <!-- Progress Tab (You Section) -->
                     <div id="progressTabContent" class="main-tab-content">
-                        <h3 class="activity-title">📊 Your Progress & The Three Virtues</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 class="activity-title" style="margin: 0;">📊 Your Progress & The Three Virtues</h3>
+                            <button id="resetProgressBtn" class="debug-action-btn" onclick="resetProgress()" style="padding: 10px 20px; background: linear-gradient(135deg, #8b6fd8, #da6a32); border: 2px solid var(--mystic-glow); color: white; cursor: pointer; border-radius: 8px; font-family: 'Cinzel', serif;">🔄 Reset Progress</button>
+                        </div>
                         
                         <!-- Overall Stats -->
                         <div class="progress-overview">
@@ -5348,7 +5349,7 @@
     <script>
         // Configuration
         const IMGBB_API_KEY = 'fecb6b8c48020815465bbc22d8c0e7b0';
-        const JSONBIN_API_KEY = '$2a$10$IHpJv8M/m2qmjz8AHAJvpuBmVIJUtlPTSnAh0FRKUq1a90bDmA7Mm';
+        const JSONBIN_API_KEY = '$2a$10$d4q2A3i9vhO5W5X3xfZeneo01A24mP9Xuw1KJWv9YkIiwycVYRBlm';
         const AUTO_SYNC_INTERVAL = 30000; // 30 seconds
 
         // Validate configuration
@@ -5367,6 +5368,7 @@
         }
 
         let autoSyncTimer = null;
+        let cloudSyncTimer = null;
 
         // Default profile data
         const defaultProfile = {
@@ -5542,12 +5544,12 @@
             try {
                 showSyncStatus('Syncing...', 'syncing');
                 
+                console.log('Attempting sync with API key:', JSONBIN_API_KEY.substring(0, 15) + '...');
                 const response = await fetch('https://api.jsonbin.io/v3/b', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Master-Key': JSONBIN_API_KEY,
-                        'X-Collection-Id': deviceId // Use device ID as collection
+                        'X-Master-Key': JSONBIN_API_KEY
                     },
                     body: JSON.stringify({
                         deviceId: deviceId,
@@ -5556,25 +5558,37 @@
                         lastModified: new Date().toISOString()
                     })
                 });
+                
+                console.log('Sync response status:', response.status, response.statusText);
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
+                console.log('Sync response data:', data);
                 
-                if (data.success !== false && data.metadata && data.metadata.id) {
+                if (!response.ok) {
+                    const errorMsg = data.message || data.error || `HTTP ${response.status}: ${response.statusText}`;
+                    throw new Error(errorMsg);
+                }
+                
+                if (data.metadata && data.metadata.id) {
                     localStorage.setItem('cloudBinId', data.metadata.id);
                     localStorage.setItem('lastSyncTime', new Date().toISOString());
                     showSyncStatus('Synced ✓', 'success');
                     console.log('✓ Auto-sync successful to bin:', data.metadata.id);
                     return true;
                 } else {
-                    throw new Error(data.error || 'Invalid response from JSONbin');
+                    throw new Error(data.message || data.error || 'Invalid response from JSONbin');
                 }
             } catch (error) {
-                console.error('✗ Auto-sync error:', error.message);
-                showSyncStatus(`Sync failed: ${error.message}`, 'error');
+                console.error('✗ Auto-sync error:', error);
+                const msg = error.message?.includes('400') || error.message?.includes('Bad Request')
+                    ? `Sync failed (HTTP 400): ${error.message}\n\nCheck: 1) API key is correct (from jsonbin.io dashboard)\n2) You have available bins in your account`
+                    : `Sync failed: ${error.message}`;
+                showSyncStatus(msg, 'error');
+                alert(msg);
                 return false;
             }
         }
@@ -5665,8 +5679,9 @@
                 if (autoSyncTimer) clearInterval(autoSyncTimer);
                 autoSyncTimer = setInterval(syncToCloud, AUTO_SYNC_INTERVAL);
                 
-                // Also check for updates periodically
-                setInterval(loadFromCloud, AUTO_SYNC_INTERVAL);
+                // Also check for updates periodically (managed separately)
+                if (cloudSyncTimer) clearInterval(cloudSyncTimer);
+                cloudSyncTimer = setInterval(loadFromCloud, AUTO_SYNC_INTERVAL);
                 
                 alert('✨ Auto-sync enabled! Your profile will sync automatically every 30 seconds.');
             } else {
@@ -5679,10 +5694,8 @@
                 const allSyncBtns = document.querySelectorAll('#syncModeBtn, #navSyncBtn');
                 allSyncBtns.forEach(btn => btn.classList.remove('auto-sync-enabled'));
                 
-                if (autoSyncTimer) {
-                    clearInterval(autoSyncTimer);
-                    autoSyncTimer = null;
-                }
+                if (autoSyncTimer) { clearInterval(autoSyncTimer); autoSyncTimer = null; }
+                if (cloudSyncTimer) { clearInterval(cloudSyncTimer); cloudSyncTimer = null; }
                 
                 console.log('✗ Auto-sync disabled');
             }
@@ -5690,38 +5703,159 @@
 
         // Update UI
         function updateUI(profile) {
-            document.getElementById('scribeName').textContent = profile.name;
-            document.getElementById('scribeRank').textContent = profile.rank;
-            document.getElementById('currentLevel').textContent = profile.level;
-            document.getElementById('xpDisplay').textContent = `${profile.xp.toLocaleString()} / ${profile.xpMax.toLocaleString()}`;
-            document.getElementById('focusDisplay').textContent = `${profile.focus}%`;
-            document.getElementById('totalWorkings').textContent = profile.workings;
-            document.getElementById('daysActive').textContent = profile.daysActive;
+            const scribeNameEl = document.getElementById('scribeName'); if (scribeNameEl) scribeNameEl.textContent = profile.name;
+            const scribeRankEl = document.getElementById('scribeRank'); if (scribeRankEl) scribeRankEl.textContent = profile.rank;
+            const currentLevelEl = document.getElementById('currentLevel'); if (currentLevelEl) currentLevelEl.textContent = profile.level;
+            const xpDisplayEl = document.getElementById('xpDisplay'); if (xpDisplayEl) xpDisplayEl.textContent = `${profile.xp.toLocaleString()} / ${profile.xpMax.toLocaleString()}`;
+            const focusDisplayEl = document.getElementById('focusDisplay'); if (focusDisplayEl) focusDisplayEl.textContent = `${profile.focus}%`;
+            const totalWorkingsEl = document.getElementById('totalWorkings'); if (totalWorkingsEl) totalWorkingsEl.textContent = profile.workings;
+            const daysActiveEl = document.getElementById('daysActive'); if (daysActiveEl) daysActiveEl.textContent = profile.daysActive;
 
             const avatarEl = document.getElementById('profileAvatar');
-            if (profile.avatarType === 'image' && profile.avatarUrl) {
-                avatarEl.innerHTML = `<img src="${profile.avatarUrl}" alt="Avatar">`;
-            } else {
-                avatarEl.textContent = profile.avatar;
+            if (avatarEl) {
+                if (profile.avatarType === 'image' && profile.avatarUrl) {
+                    avatarEl.innerHTML = `<img src="${profile.avatarUrl}" alt="Avatar">`;
+                } else {
+                    avatarEl.textContent = profile.avatar;
+                }
             }
 
             const xpPercent = (profile.xp / profile.xpMax) * 100;
-            document.getElementById('xpBar').style.width = `${xpPercent}%`;
-            document.getElementById('focusBar').style.width = `${profile.focus}%`;
+            const xpBarEl = document.getElementById('xpBar'); if (xpBarEl) xpBarEl.style.width = `${xpPercent}%`;
+            const focusBarEl = document.getElementById('focusBar'); if (focusBarEl) focusBarEl.style.width = `${profile.focus}%`;
 
-            document.getElementById('thothPoints').textContent = `${profile.virtues.thoth.points} pts`;
-            document.getElementById('thothRank').textContent = `Rank: ${profile.virtues.thoth.rank}`;
-            document.getElementById('thothProgress').style.width = `${profile.virtues.thoth.progress}%`;
+            const thothPointsEl = document.getElementById('thothPoints'); if (thothPointsEl) thothPointsEl.textContent = `${profile.virtues.thoth.points} pts`;
+            const thothRankEl = document.getElementById('thothRank'); if (thothRankEl) thothRankEl.textContent = `Rank: ${profile.virtues.thoth.rank}`;
+            const thothProgressEl = document.getElementById('thothProgress'); if (thothProgressEl) thothProgressEl.style.width = `${profile.virtues.thoth.progress}%`;
 
-            document.getElementById('maatPoints').textContent = `${profile.virtues.maat.points} pts`;
-            document.getElementById('maatRank').textContent = `Rank: ${profile.virtues.maat.rank}`;
-            document.getElementById('maatProgress').style.width = `${profile.virtues.maat.progress}%`;
+            const maatPointsEl = document.getElementById('maatPoints'); if (maatPointsEl) maatPointsEl.textContent = `${profile.virtues.maat.points} pts`;
+            const maatRankEl = document.getElementById('maatRank'); if (maatRankEl) maatRankEl.textContent = `Rank: ${profile.virtues.maat.rank}`;
+            const maatProgressEl = document.getElementById('maatProgress'); if (maatProgressEl) maatProgressEl.style.width = `${profile.virtues.maat.progress}%`;
 
-            document.getElementById('caerusPoints').textContent = `${profile.virtues.caerus.points} pts`;
-            document.getElementById('caerusRank').textContent = `Rank: ${profile.virtues.caerus.rank}`;
-            document.getElementById('caerusProgress').style.width = `${profile.virtues.caerus.progress}%`;
+            const caerusPointsEl = document.getElementById('caerusPoints'); if (caerusPointsEl) caerusPointsEl.textContent = `${profile.virtues.caerus.points} pts`;
+            const caerusRankEl = document.getElementById('caerusRank'); if (caerusRankEl) caerusRankEl.textContent = `Rank: ${profile.virtues.caerus.rank}`;
+            const caerusProgressEl = document.getElementById('caerusProgress'); if (caerusProgressEl) caerusProgressEl.style.width = `${profile.virtues.caerus.progress}%`;
 
             updateMoonAndPlanet();
+            // Keep Progress Report in sync if visible
+            updateProgressReport(profile);
+        }
+
+        // Update Progress Report section (legacy main-tab layout)
+        function updateProgressReport(profile) {
+            const container = document.getElementById('progressTabContent');
+            if (!container) return;
+
+            // Update top stats by label
+            container.querySelectorAll('.progress-stat-card').forEach(card => {
+                const labelEl = card.querySelector('.progress-stat-label');
+                const valueEl = card.querySelector('.progress-stat-value');
+                if (!labelEl || !valueEl) return;
+                const label = labelEl.textContent.trim();
+                switch (label) {
+                    case 'Total Workings':
+                        valueEl.textContent = (profile.workings ?? 0).toLocaleString();
+                        break;
+                    case 'Day Streak':
+                        valueEl.textContent = (profile.currentStreak ?? profile.daysActive ?? 0).toLocaleString();
+                        break;
+                    case 'Level':
+                        valueEl.textContent = profile.level ?? 1;
+                        break;
+                    case 'Total XP':
+                        valueEl.textContent = (profile.xp ?? 0).toLocaleString();
+                        break;
+                }
+            });
+
+            // Update virtue progress bars and rank text
+            const virtues = ['thoth', 'maat', 'caerus'];
+            virtues.forEach(key => {
+                const fillEl = container.querySelector(`.virtue-progress-fill.${key}`);
+                if (fillEl) {
+                    const progress = profile.virtues?.[key]?.progress ?? 0;
+                    fillEl.style.width = `${progress}%`;
+                    const itemEl = fillEl.closest('.virtue-progress-item');
+                    const rankEl = itemEl?.querySelector('.virtue-progress-rank');
+                    const points = profile.virtues?.[key]?.points ?? 0;
+                    const rank = profile.virtues?.[key]?.rank ?? 1;
+                    if (rankEl) rankEl.textContent = `Rank ${rank} • ${points} pts`;
+                }
+            });
+        }
+
+        // Update Progress Report for the 3-column sidebar view
+        function updateProgressView(profile) {
+            const container = document.getElementById('content-progress');
+            if (!container) return;
+            const thothPts = profile.virtues?.thoth?.points ?? 0;
+            const thothProg = profile.virtues?.thoth?.progress ?? 0;
+            const maatPts = profile.virtues?.maat?.points ?? 0;
+            const maatProg = profile.virtues?.maat?.progress ?? 0;
+            const caerusPts = profile.virtues?.caerus?.points ?? 0;
+            const caerusProg = profile.virtues?.caerus?.progress ?? 0;
+            const thothVal = container.querySelector('#progress-thoth-value');
+            const thothFill = container.querySelector('#progress-thoth-fill');
+            const maatVal = container.querySelector('#progress-maat-value');
+            const maatFill = container.querySelector('#progress-maat-fill');
+            const caerusVal = container.querySelector('#progress-caerus-value');
+            const caerusFill = container.querySelector('#progress-caerus-fill');
+            if (thothVal) thothVal.textContent = `${thothPts} pts`;
+            if (thothFill) thothFill.style.width = `${thothProg}%`;
+            if (maatVal) maatVal.textContent = `${maatPts} pts`;
+            if (maatFill) maatFill.style.width = `${maatProg}%`;
+            if (caerusVal) caerusVal.textContent = `${caerusPts} pts`;
+            if (caerusFill) caerusFill.style.width = `${caerusProg}%`;
+        }
+
+        // Reset function: clears quest progress and resets core stats/virtues
+        function resetProgress() {
+            if (!confirm('⚠️ Reset ALL progress?\n\nThis will:\n• Clear all quest completions\n• Reset virtue points to 0\n• Reset stats (XP, level, streak)\n\nThis cannot be undone.')) return;
+            const richProfile = JSON.parse(localStorage.getItem('grimorioProfile') || '{}');
+            // Reset core counters
+            richProfile.totalPoints = 0; // This drives XP and level calculations
+            richProfile.totalWorkings = 0;
+            richProfile.currentStreak = 0;
+            richProfile.longestStreak = 0;
+            richProfile.overallRank = 1;
+            
+            // Reset virtues points and levels if present
+            if (richProfile.thoth?.points !== undefined) {
+                richProfile.thoth.points = 0; richProfile.thoth.level = 1;
+            }
+            if (richProfile.maat?.points !== undefined) {
+                richProfile.maat.points = 0; richProfile.maat.level = 1;
+            }
+            if (richProfile.caerus?.points !== undefined) {
+                richProfile.caerus.points = 0; richProfile.caerus.level = 1;
+            }
+            // Reset quest tracking if present
+            if (richProfile.completedQuests) {
+                richProfile.completedQuests.daily = [];
+                richProfile.completedQuests.weekly = [];
+                richProfile.completedQuests.monthly = [];
+            }
+            // Clear lightweight quest progress cache
+            localStorage.removeItem('questProgress');
+            
+            // Persist and refresh UI
+            saveProfileData(richProfile);
+            const viewProfile = loadProfile();
+            updateUI(viewProfile);
+            updateProgressReport(viewProfile);
+            updateProgressView(viewProfile);
+            
+            // Re-render quests in all views
+            try {
+                initializeQuestSystem();
+                renderQuests('daily');
+                renderQuests('weekly');
+                renderQuests('monthly');
+            } catch (e) {
+                console.warn('Quest re-render after reset:', e);
+            }
+            
+            alert('✨ Progress has been reset successfully!');
         }
 
         // Update moon and planet
@@ -5825,29 +5959,34 @@
         function saveProfile(event) {
             event.preventDefault();
             
-            const profile = loadProfile();
-            profile.name = document.getElementById('nameInput').value;
-            profile.rank = document.getElementById('rankInput').value;
-            profile.level = parseInt(document.getElementById('levelInput').value);
+            // Update the rich grimorioProfile schema, then refresh UI from mapped view
+            const richProfile = JSON.parse(localStorage.getItem('grimorioProfile') || '{}');
+            
+            // Core display fields
+            richProfile.scribeName = document.getElementById('nameInput').value || richProfile.scribeName || 'Unnamed Scribe';
+            // Do not overwrite overallRank/totalPoints here; rank text input is decorative for the dashboard
             
             const preview = document.getElementById('avatarPreview');
             const imageUrl = preview.dataset.imageUrl;
             
             if (imageUrl) {
-                profile.avatarType = 'image';
-                profile.avatarUrl = imageUrl;
+                richProfile.avatarType = 'image';
+                richProfile.avatarUrl = imageUrl;
             } else {
                 const selectedAvatar = document.querySelector('.avatar-option.selected');
                 if (selectedAvatar) {
-                    profile.avatar = selectedAvatar.dataset.avatar;
-                    profile.avatarType = 'emoji';
-                    profile.avatarUrl = null;
+                    richProfile.avatar = selectedAvatar.dataset.avatar;
+                    richProfile.avatarType = 'emoji';
+                    richProfile.avatarUrl = null;
                 }
             }
             
             localStorage.setItem('lastModified', new Date().toISOString());
-            saveProfileData(profile);
-            updateUI(profile);
+            saveProfileData(richProfile);
+            
+            // Refresh UI from mapped view model
+            const viewProfile = loadProfile();
+            updateUI(viewProfile);
             closeProfileModal();
             
             alert('✨ Profile updated successfully!');
@@ -6157,14 +6296,24 @@
                 targetContent.classList.add('active');
             }
             
-            // Add active class to clicked tab
-            event.target.classList.add('active');
+            // Add active class to the corresponding tab button (guarded)
+            let activeBtn = null;
+            if (typeof event !== 'undefined' && event && event.target && event.target.classList && event.target.classList.contains('main-tab')) {
+                activeBtn = event.target;
+            } else {
+                activeBtn = Array.from(document.querySelectorAll('.main-tab'))
+                    .find(btn => btn.getAttribute('onclick')?.includes(`switchTab('${tabName}')`));
+            }
+            if (activeBtn) activeBtn.classList.add('active');
             
             // Load content if needed
             if (tabName === 'notes') {
                 loadNotesCompact();
             } else if (tabName === 'toolkit') {
                 loadToolkitState();
+            } else if (tabName === 'progress') {
+                const viewProfile = loadProfile();
+                updateProgressReport(viewProfile);
             }
         }
 
@@ -6556,6 +6705,9 @@
                 loadNotesCompact();
             } else if (tabName === 'toolkit') {
                 loadToolkitState();
+            } else if (tabName === 'progress') {
+                const viewProfile = loadProfile();
+                updateProgressReport(viewProfile);
             } else if (tabName === 'moon') {
                 updateMoonTracker();
             } else if (tabName.startsWith('volume')) {
@@ -7051,8 +7203,15 @@
             // Show selected subtab content
             document.getElementById(tabName + 'Toolkit').classList.add('active');
             
-            // Add active class to clicked subtab
-            event.target.classList.add('active');
+            // Add active class to clicked subtab (guarded)
+            let activeSubtab = null;
+            if (typeof event !== 'undefined' && event && event.target && event.target.classList && event.target.classList.contains('toolkit-subtab')) {
+                activeSubtab = event.target;
+            } else {
+                activeSubtab = Array.from(document.querySelectorAll('.toolkit-subtab'))
+                    .find(btn => btn.getAttribute('onclick')?.includes(`'${tabName}'`));
+            }
+            if (activeSubtab) activeSubtab.classList.add('active');
         }
 
         function toggleCategory(categoryId) {
@@ -7103,7 +7262,7 @@
 
         // Quest Templates
         // ===== LUNAR PHASE CALCULATOR =====
-        function getMoonPhase(date = new Date()) {
+        function getMoonPhaseCategory(date = new Date()) {
             // Known new moon: January 6, 2000
             const knownNewMoon = new Date(2000, 0, 6);
             const lunarCycle = 29.53058867; // days
@@ -7124,7 +7283,7 @@
         
         // Get weekly quests based on current moon phase
         function getWeeklyQuestTemplates() {
-            const phase = getMoonPhase();
+            const phase = getMoonPhaseCategory();
             const templates = {
                 new: [
                     {
@@ -7500,6 +7659,8 @@
             // Update profile display
             const profile = loadProfile();
             updateUI(profile);
+            updateProgressReport(profile);
+            updateProgressView(profile);
         }
 
         function showQuestNotification(message) {
@@ -7560,7 +7721,7 @@
                 alert('Enable 🐞 Debug to use test actions.');
                 return;
             }
-            const toComplete = weeklyQuestTemplates;
+            const toComplete = getWeeklyQuestTemplates();
             const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
             const completedWeekly = progress.completedWeekly || [];
             const remaining = toComplete.filter(q => !completedWeekly.includes(q.id));
@@ -7887,6 +8048,12 @@
             
             // Load content based on view
             loadViewContent(viewName);
+
+            // Update Progress view when selected
+            if (viewName === 'progress') {
+                const viewProfile = loadProfile();
+                updateProgressView(viewProfile);
+            }
         }
 
         function loadViewContent(viewName) {
@@ -7912,8 +8079,7 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            // Clear quest progress for fresh testing
-            localStorage.removeItem('questProgress');
+            // Preserve existing quest progress across reloads
             
             const profile = loadProfile();
             updateUI(profile);
@@ -7946,7 +8112,7 @@
                 syncBtns.forEach(btn => btn.classList.add('auto-sync-enabled'));
                 
                 autoSyncTimer = setInterval(syncToCloud, AUTO_SYNC_INTERVAL);
-                setInterval(loadFromCloud, AUTO_SYNC_INTERVAL);
+                cloudSyncTimer = setInterval(loadFromCloud, AUTO_SYNC_INTERVAL);
             }
             
             setTimeout(() => {
