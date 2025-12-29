@@ -105,6 +105,37 @@
             }
         }
 
+        /* Debug Badge */
+        .debug-badge {
+            display: none;
+            margin: 10px 0 0 0;
+            padding: 6px 12px;
+            border: 2px dashed var(--maat-silver);
+            border-radius: 999px;
+            color: var(--maat-glow);
+            background: rgba(255,255,255,0.05);
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            max-width: fit-content;
+        }
+
+        .debug-action-btn {
+            display: none;
+            margin: 8px 0 16px 0;
+            padding: 6px 10px;
+            border: 2px solid var(--caerus-gold);
+            border-radius: 8px;
+            background: rgba(218, 165, 32, 0.08);
+            color: var(--caerus-gold);
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .debug-action-btn:hover {
+            background: rgba(218, 165, 32, 0.15);
+        }
+
         /* Top Navigation */
         .top-nav {
             background: linear-gradient(135deg, rgba(26, 15, 46, 0.95), rgba(74, 44, 109, 0.95));
@@ -2715,6 +2746,7 @@
                     <span id="navSyncIcon">☁️</span>
                     <span id="navSyncText">Sync</span>
                 </button>
+                <button class="nav-btn" id="navDebugBtn" onclick="toggleDebugMode()" title="Toggle Debug">🐞 Debug</button>
             </div>
         </div>
     </nav>
@@ -2794,6 +2826,8 @@
                     <div id="activityTabContent" class="main-tab-content active">
                         <!-- Quests Section -->
                         <h3 class="activity-title">⭐ Daily Quests & Challenges</h3>
+                        <div id="debugBadge" class="debug-badge">🐞 Debug: initializing…</div>
+                        <button id="debugCompleteDailyBtn" class="debug-action-btn" onclick="completeAllDailyQuestsDebug()">Complete all daily quests</button>
                         
                         <!-- Daily Quests -->
                         <div class="quest-section">
@@ -5077,6 +5111,15 @@
                 tabsContainer.innerHTML = '';
                 tabsContainer.style.display = 'none';
                 document.getElementById('activityTabContent').classList.add('active');
+
+                // Ensure quests and activity feed are initialized when switching to Dashboard
+                try {
+                    initializeQuestSystem();
+                    displayActivityFeed();
+                    updateDebugBadge(window.__debug || {});
+                } catch (e) {
+                    console.warn('Dashboard init fallback encountered an error:', e);
+                }
             } else {
                 // Other sections: Show tabs
                 tabsContainer.style.display = 'flex';
@@ -6041,6 +6084,10 @@
             checkQuestResets();
             loadAllQuests();
             startQuestTimers();
+            // Mark debug status
+            window.__debug = window.__debug || {};
+            window.__debug.questsInitialized = true;
+            updateDebugBadge(window.__debug);
         }
 
         function checkQuestResets() {
@@ -6241,6 +6288,27 @@
             updateUI(profile);
         }
 
+        // Debug-only helper: complete all daily quests quickly
+        function completeAllDailyQuestsDebug() {
+            if (!isDebugEnabled()) {
+                alert('Enable 🐞 Debug to use test actions.');
+                return;
+            }
+            const questData = getQuestData();
+            const progress = JSON.parse(localStorage.getItem('questProgress') || '{}');
+            const completedDaily = progress.completedDaily || [];
+            const toComplete = questData.daily.filter(q => !completedDaily.includes(q.id));
+            if (toComplete.length === 0) {
+                showQuestNotification('All daily quests already completed.');
+                return;
+            }
+            toComplete.forEach((q, idx) => {
+                setTimeout(() => {
+                    completeQuest('daily', q.id, q.virtue, q.experience);
+                }, idx * 200);
+            });
+        }
+
         function showQuestNotification(message) {
             // Create notification element
             const notification = document.createElement('div');
@@ -6340,6 +6408,10 @@
             const feedContainer = document.getElementById('activityFeed');
             
             if (!feedContainer) return;
+            // Mark debug status and update badge
+            window.__debug = window.__debug || {};
+            window.__debug.activityInitialized = true;
+            updateDebugBadge(window.__debug);
             
             if (activities.length === 0) {
                 feedContainer.innerHTML = `
@@ -6401,6 +6473,35 @@
             const completed = checkedItems.length;
             
             document.getElementById('toolkitProgress').textContent = `${completed} / ${total}`;
+        }
+
+        // Debug helpers
+        function isDebugEnabled() {
+            return localStorage.getItem('debugEnabled') === 'true';
+        }
+
+        function toggleDebugMode() {
+            const enabled = isDebugEnabled();
+            localStorage.setItem('debugEnabled', (!enabled).toString());
+            updateDebugBadge(window.__debug || {});
+            const btn = document.getElementById('navDebugBtn');
+            if (btn) btn.textContent = (!enabled) ? '🐞 Debug (On)' : '🐞 Debug';
+        }
+
+        function updateDebugBadge(status) {
+            const badge = document.getElementById('debugBadge');
+            const debugBtn = document.getElementById('debugCompleteDailyBtn');
+            if (!badge) return;
+            if (!isDebugEnabled()) {
+                badge.style.display = 'none';
+                if (debugBtn) debugBtn.style.display = 'none';
+                return;
+            }
+            const q = status && status.questsInitialized ? '✓' : '…';
+            const a = status && status.activityInitialized ? '✓' : '…';
+            badge.textContent = `🐞 Debug: Quests ${q} • Activity ${a}`;
+            badge.style.display = 'inline-block';
+            if (debugBtn) debugBtn.style.display = 'inline-block';
         }
 
         function updateCategoryCount(categoryId) {
@@ -6514,6 +6615,9 @@
             
             // Display Activity Feed
             displayActivityFeed();
+            
+            // Ensure debug reflects current state
+            updateDebugBadge(window.__debug || {});
             
             // Check if auto-sync is enabled
             if (localStorage.getItem('autoSyncEnabled') === 'true') {
