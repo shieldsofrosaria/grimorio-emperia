@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volume IV: Lunar Practice & Timing</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --void-black: #0a0514;
+            --deep-purple: #1a0f2e;
+            --mystic-purple: #2d1b4e;
+            --royal-purple: #4a2c6d;
+            
+            --thoth-blue: #4a7dc7;
+            --maat-silver: #c0d0e8;
+            --caerus-gold: #daa520;
+            
+            --mystic-glow: #8b6fd8;
+            --arcane-glow: #6ba3ff;
+            --gold-glow: #ffd700;
+            --text-primary: #e8f0ff;
+            --text-secondary: #a8b8d8;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: linear-gradient(135deg, var(--void-black), var(--deep-purple));
+            color: var(--text-primary);
+            padding: 30px 20px;
+            line-height: 1.8;
+        }
+
+        .volume-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid var(--caerus-gold);
+            position: relative;
+        }
+
+        .volume-header::before,
+        .volume-header::after {
+            content: '✦';
+            position: absolute;
+            bottom: -12px;
+            font-size: 1.5rem;
+            color: var(--caerus-gold);
+            text-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        .volume-header::before { left: 20px; }
+        .volume-header::after { right: 20px; }
+
+        .volume-number {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: var(--caerus-gold);
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .volume-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--caerus-gold), var(--maat-silver));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+        }
+
+        .trinity-symbols {
+            font-size: 2rem;
+            letter-spacing: 15px;
+            color: var(--maat-silver);
+            filter: drop-shadow(0 0 8px var(--arcane-glow));
+        }
+
+        .section {
+            background: linear-gradient(135deg, rgba(45, 27, 78, 0.6), rgba(74, 44, 109, 0.4));
+            border: 2px solid var(--thoth-blue);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 
+                0 4px 20px rgba(74, 125, 199, 0.3),
+                inset 0 0 30px rgba(74, 125, 199, 0.05);
+            position: relative;
+        }
+
+        .section::before {
+            content: '✦';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: var(--caerus-gold);
+            opacity: 0.3;
+        }
+
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            color: var(--caerus-gold);
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(218, 165, 32, 0.5);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-style: italic;
+            color: var(--maat-silver);
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .subsection-title {
+            color: var(--thoth-blue);
+            font-size: 1.3rem;
+            margin: 25px 0 15px 0;
+            font-weight: 600;
+        }
+
+        .label {
+            color: var(--caerus-gold);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        ul {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        li {
+            padding-left: 25px;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        li::before {
+            content: '⟡';
+            position: absolute;
+            left: 0;
+            color: var(--thoth-blue);
+        }
+
+        .timing-category {
+            background: linear-gradient(135deg, rgba(10, 5, 20, 0.6), rgba(45, 27, 78, 0.4));
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid var(--caerus-gold);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--deep-purple);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--royal-purple);
+            border-radius: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .volume-title { font-size: 2rem; }
+            .section { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="volume-header">
+        <div class="volume-number">VOLUME IV</div>
+        <h1 class="volume-title">Lunar Practice & Timing</h1>
+        <div class="trinity-symbols">🌙 ⚖️ ⚡</div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">⚡ Understanding Caerus</h2>
+        <p class="section-subtitle">A Practical Treatise on Timing</p>
+        
+        <h3 class="subsection-title">The Fundamental Question</h3>
+        <p style="margin-bottom: 20px;">Caerus asks: "Does this feel <em>right</em> to execute <em>now</em>?"</p>
+        
+        <p class="label" style="margin-bottom: 10px;">His symbols reveal his nature:</p>
+        <ul>
+            <li><strong>Razor's edge</strong> = The precise instant between too soon and too late</li>
+            <li><strong>Running on toes</strong> = The moment passes swiftly</li>
+            <li><strong>Wings on feet</strong> = Opportunity flies away</li>
+            <li><strong>Forelock to grasp</strong> = You must seize it as it approaches</li>
+            <li><strong>Bald behind</strong> = Once passed, nothing remains to hold</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">🎯 Three Degrees of Timing</h2>
+        
+        <h3 class="subsection-title">Degree I: External Timing (Most Learnable)</h3>
+        <p style="margin-bottom: 20px;">These cycles are predictable and observable:</p>
+        
+        <div class="timing-category">
+            <span class="label">🌙 Lunar Phases</span>
+            <ul style="margin-top: 15px;">
+                <li><strong>New Moon 🌑</strong> - Initiation of new workings, planting intentions, fresh beginnings</li>
+                <li><strong>Waxing Moon 🌓</strong> - Growth, accumulation, attraction, building power</li>
+                <li><strong>Full Moon 🌕</strong> - Peak potency, culmination, charging talismans</li>
+                <li><strong>Waning Moon 🌗</strong> - Release, banishing, purification, diminishment</li>
+            </ul>
+        </div>
+        
+        <div class="timing-category">
+            <span class="label">📅 Days of the Week (Planetary Hours)</span>
+            <ul style="margin-top: 15px;">
+                <li><strong>Monday (Luna) 🌙</strong> - Thoth's work: wisdom-seeking, divination, dream work, intuition</li>
+                <li><strong>Tuesday (Mars) ♂️</strong> - Protection, courage, conflict resolution, martial vigor</li>
+                <li><strong>Wednesday (Mercury) ☿️</strong> - Communication, learning, swift workings, travel safety</li>
+                <li><strong>Thursday (Jupiter) ♃</strong> - Prosperity, expansion, justice (Ma'at-aligned), growth</li>
+                <li><strong>Friday (Venus) ♀️</strong> - Healing, harmony, beauty, relationship matters</li>
+                <li><strong>Saturday (Saturn) ♄</strong> - Banishing, binding, endings, setting boundaries</li>
+                <li><strong>Sunday (Sol) ☉</strong> - General power, health, success, vitality</li>
+            </ul>
+        </div>
+        
+        <div class="timing-category">
+            <span class="label">🍂 Seasonal Correspondences</span>
+            <ul style="margin-top: 15px;">
+                <li><strong>Spring 🌸</strong> - Growth workings, new endeavors, planting seeds</li>
+                <li><strong>Summer ☀️</strong> - Peak energy work, abundance, maximum solar power</li>
+                <li><strong>Autumn 🍁</strong> - Harvest of results, gratitude, reflection, preparation</li>
+                <li><strong>Winter ❄️</strong> - Rest, planning, protection, internal work</li>
+            </ul>
+        </div>
+        
+        <div class="timing-category">
+            <span class="label">⏰ Hours of the Day</span>
+            <ul style="margin-top: 15px;">
+                <li><strong>Dawn 🌅</strong> - New beginnings, clarity, hope</li>
+                <li><strong>Noon ☀️</strong> - Maximum power, peak solar energy</li>
+                <li><strong>Dusk 🌇</strong> - Transitions, release, closure</li>
+                <li><strong>Midnight 🌙</strong> - Deep workings, hidden knowledge, psychic enhancement</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3 class="subsection-title">Degree II: Internal Timing (Requires Self-Knowledge)</h3>
+        <p style="margin-bottom: 15px;">This concerns the scribe's own readiness:</p>
+        
+        <p class="label" style="margin-bottom: 10px;">Questions for Discernment:</p>
+        <ul style="margin-bottom: 20px;">
+            <li>Have I the energy and focus presently?</li>
+            <li>Are all materials assembled and prepared?</li>
+            <li>Does this demand immediate action or may it wait?</li>
+            <li>Am I in proper mental and spiritual condition?</li>
+        </ul>
+        
+        <p>If any answer is negative → <span class="label">Wait.</span> This is Caerus saying "not yet."</p>
+    </div>
+
+    <div class="section">
+        <h3 class="subsection-title">Degree III: Synchronistic Timing (Advanced Practice)</h3>
+        <p style="margin-bottom: 15px;">This is Caerus arriving unbidden:</p>
+        
+        <p class="label" style="margin-bottom: 10px;">Manifestations:</p>
+        <ul style="margin-bottom: 20px;">
+            <li>Whilst contemplating a protection working, someone gifts you rosemary without knowing your need</li>
+            <li>Information about a specific herb appears thrice in a single day through different sources</li>
+            <li>Strong compulsion to act immediately without logical cause</li>
+            <li>All required materials appear simultaneously without seeking</li>
+        </ul>
+        
+        <p>This is the <span class="label">razor's edge moment</span> → Act swiftly or it passes forever</p>
+    </div>
+</body>
+</html>

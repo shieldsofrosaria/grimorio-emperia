@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scribe's Dashboard - Grimorio Emperia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --void-black: #0a0514;
+            --deep-purple: #1a0f2e;
+            --mystic-purple: #2d1b4e;
+            --royal-purple: #4a2c6d;
+            --arcane-blue: #2a4a7d;
+            --celestial-blue: #3d6ba3;
+            
+            --thoth-blue: #4a7dc7;
+            --maat-silver: #c0d0e8;
+            --caerus-gold: #daa520;
+            
+            --mystic-glow: #8b6fd8;
+            --arcane-glow: #6ba3ff;
+            --gold-glow: #ffd700;
+            --text-primary: #e8f0ff;
+            --text-secondary: #a8b8d8;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: linear-gradient(135deg, var(--void-black) 0%, var(--deep-purple) 50%, var(--void-black) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Starfield */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, white, transparent),
+                radial-gradient(2px 2px at 60% 70%, var(--thoth-blue), transparent),
+                radial-gradient(1px 1px at 50% 50%, var(--caerus-gold), transparent),
+                radial-gradient(1px 1px at 80% 10%, var(--maat-silver), transparent);
+            background-size: 200% 200%;
+            animation: twinkle 4s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, rgba(45, 27, 78, 0.6), rgba(74, 44, 109, 0.4));
+            border: 2px solid var(--caerus-gold);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(218, 165, 32, 0.4);
+        }
+
+        .dashboard-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--caerus-gold), var(--maat-silver), var(--thoth-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .trinity-symbols {
+            font-size: 1.8rem;
+            letter-spacing: 15px;
+            margin-top: 15px;
+            filter: drop-shadow(0 0 10px var(--arcane-glow));
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-section {
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            color: var(--caerus-gold);
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(218, 165, 32, 0.5);
+        }
+
+        /* Cards */
+        .card {
+            background: linear-gradient(135deg, rgba(45, 27, 78, 0.7), rgba(74, 44, 109, 0.5));
+            border: 2px solid var(--thoth-blue);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(74, 125, 199, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '✦';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: var(--caerus-gold);
+            opacity: 0.3;
+        }
+
+        .card-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
+            color: var(--caerus-gold);
+            margin-bottom: 15px;
+        }
+
+        /* Volumes Grid */
+        .volumes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .volume-card {
+            background: linear-gradient(135deg, rgba(45, 27, 78, 0.8), rgba(74, 44, 109, 0.6));
+            border: 2px solid var(--thoth-blue);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .volume-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent, rgba(218, 165, 32, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 12px;
+        }
+
+        .volume-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--caerus-gold);
+            box-shadow: 0 8px 25px rgba(218, 165, 32, 0.4);
+        }
+
+        .volume-card:hover::before {
+            opacity: 1;
+        }
+
+        .volume-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px var(--gold-glow));
+        }
+
+        .volume-card-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: var(--caerus-gold);
+            margin-bottom: 8px;
+        }
+
+        .volume-card-desc {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        /* Volume Viewer Modal */
+        .volume-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 5, 20, 0.95);
+            z-index: 1000;
+            overflow: auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .volume-modal.active {
+            display: block;
+        }
+
+        .volume-viewer {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: linear-gradient(135deg, var(--void-black), var(--deep-purple));
+            border: 3px solid var(--caerus-gold);
+            border-radius: 15px;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(218, 165, 32, 0.5);
+        }
+
+        .volume-viewer-header {
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(45, 27, 78, 0.8), rgba(74, 44, 109, 0.6));
+            border-bottom: 2px solid var(--caerus-gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .volume-viewer-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.6rem;
+            color: var(--caerus-gold);
+        }
+
+        .close-volume {
+            background: none;
+            border: 2px solid var(--caerus-gold);
+            color: var(--caerus-gold);
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-volume:hover {
+            background: var(--caerus-gold);
+            color: var(--void-black);
+            transform: rotate(90deg);
+        }
+
+        .volume-content {
+            height: calc(100vh - 140px);
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .volume-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* Quick Actions */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, rgba(74, 44, 109, 0.6), rgba(45, 27, 78, 0.8));
+            border: 2px solid var(--thoth-blue);
+            color: var(--text-primary);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .action-btn:hover {
+            border-color: var(--caerus-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(218, 165, 32, 0.3);
+        }
+
+        /* Stat bars */
+        .stat-item {
+            margin-bottom: 15px;
+        }
+
+        .stat-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+
+        .stat-bar {
+            height: 8px;
+            background: rgba(10, 5, 20, 0.6);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--thoth-blue);
+        }
+
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--thoth-blue), var(--caerus-gold));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-title { font-size: 2rem; }
+            .volumes-grid { grid-template-columns: 1fr 1fr; }
+            .volume-viewer { margin: 10px; }
+            .volume-content { height: calc(100vh - 120px); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--deep-purple);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--royal-purple);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--mystic-purple);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Scribe's Dashboard</h1>
+            <p class="dashboard-subtitle">Grimorio Emperia</p>
+            <div class="trinity-symbols">🌙 ⚖️ ⚡</div>
+        </div>
+
+        <!-- Profile & Stats -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2 class="card-title">📊 Practice Progress</h2>
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <span>🌙 Thoth (Wisdom)</span>
+                        <span>Level 3</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 65%;"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <span>⚖️ Ma'at (Balance)</span>
+                        <span>Level 2</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 45%;"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <span>⚡ Caerus (Timing)</span>
+                        <span>Level 2</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width: 50%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">🌙 Current Moon Phase</h2>
+                <div style="text-align: center; padding: 20px 0;">
+                    <div style="font-size: 4rem; margin-bottom: 10px;">🌗</div>
+                    <h3 style="color: var(--caerus-gold); margin-bottom: 10px;">Waning Gibbous</h3>
+                    <p style="color: var(--text-secondary);">72% Illuminated</p>
+                    <p style="margin-top: 15px; font-size: 0.95rem;">
+                        Ideal for: Release work, banishing, letting go
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">📝 Recent Activity</h2>
+                <div style="color: var(--text-secondary); font-size: 0.95rem;">
+                    <p style="margin-bottom: 10px;">🌿 Brewed protection tea - 2 days ago</p>
+                    <p style="margin-bottom: 10px;">🔔 Purified studiolo - 3 days ago</p>
+                    <p style="margin-bottom: 10px;">📚 Studied lunar timing - 5 days ago</p>
+                    <p>✨ Charged amulet - 1 week ago</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grimoire Volumes -->
+        <div class="dashboard-section">
+            <h2 class="section-header">📚 Grimoire Volumes</h2>
+            <div class="volumes-grid">
+                <div class="volume-card" onclick="openVolume('volume1')">
+                    <div class="volume-icon">🌙</div>
+                    <h3 class="volume-card-title">Volume I</h3>
+                    <p class="volume-card-desc">The Three Virtues</p>
+                </div>
+                <div class="volume-card" onclick="openVolume('volume2')">
+                    <div class="volume-icon">🛡️</div>
+                    <h3 class="volume-card-title">Volume II</h3>
+                    <p class="volume-card-desc">Daily Workings</p>
+                </div>
+                <div class="volume-card" onclick="openVolume('volume3')">
+                    <div class="volume-icon">📜</div>
+                    <h3 class="volume-card-title">Volume III</h3>
+                    <p class="volume-card-desc">Scroll Workings</p>
+                </div>
+                <div class="volume-card" onclick="openVolume('volume4')">
+                    <div class="volume-icon">⚡</div>
+                    <h3 class="volume-card-title">Volume IV</h3>
+                    <p class="volume-card-desc">Lunar Practice</p>
+                </div>
+                <div class="volume-card" onclick="openVolume('volume5')">
+                    <div class="volume-icon">📖</div>
+                    <h3 class="volume-card-title">Volume V</h3>
+                    <p class="volume-card-desc">Reference & Study</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-section">
+            <h2 class="section-header">⚡ Quick Actions</h2>
+            <div class="action-grid">
+                <button class="action-btn">🌿 New Working</button>
+                <button class="action-btn">📝 Log Practice</button>
+                <button class="action-btn">🔔 Purify Space</button>
+                <button class="action-btn">💎 Charge Item</button>
+                <button class="action-btn">🌙 Moon Tracker</button>
+                <button class="action-btn">📊 View Stats</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Volume Viewer Modal -->
+    <div id="volumeModal" class="volume-modal">
+        <div class="volume-viewer">
+            <div class="volume-viewer-header">
+                <h2 id="volumeTitle" class="volume-viewer-title">Volume</h2>
+                <button class="close-volume" onclick="closeVolume()">✕</button>
+            </div>
+            <div class="volume-content">
+                <iframe id="volumeFrame" src=""></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const volumeTitles = {
+            'volume1': 'Volume I: The Three Virtues',
+            'volume2': 'Volume II: Daily Workings',
+            'volume3': 'Volume III: Scroll Workings',
+            'volume4': 'Volume IV: Lunar Practice & Timing',
+            'volume5': 'Volume V: Reference & Study'
+        };
+
+        function openVolume(volumeId) {
+            const modal = document.getElementById('volumeModal');
+            const frame = document.getElementById('volumeFrame');
+            const title = document.getElementById('volumeTitle');
+            
+            // Set title
+            title.textContent = volumeTitles[volumeId];
+            
+            // Load volume content
+            frame.src = volumeId + '-embedded.html';
+            
+            // Show modal
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVolume() {
+            const modal = document.getElementById('volumeModal');
+            const frame = document.getElementById('volumeFrame');
+            
+            // Hide modal
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            
+            // Clear iframe
+            setTimeout(() => {
+                frame.src = '';
+            }, 300);
+        }
+
+        // Close on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeVolume();
+            }
+        });
+
+        // Close on backdrop click
+        document.getElementById('volumeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVolume();
+            }
+        });
+    </script>
+</body>
+</html>
