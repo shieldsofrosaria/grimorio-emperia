@@ -5895,13 +5895,23 @@ Write a protection charm"></textarea>
             }
         }
 
+        // Normalize reflection content for display (preserve formatting if present)
+        function renderReflectionContent(reflection) {
+            if (!reflection || reflection === '{}') {
+                return 'No reflections yet. Begin your journey by recording your thoughts and insights here.';
+            }
+            // If content includes HTML tags, render as-is; otherwise preserve line breaks.
+            const hasHtml = /<[^>]+>/.test(reflection);
+            return hasHtml ? reflection : reflection.replace(/\n/g, '<br>');
+        }
+
         // Display journal in view mode
         function loadJournalView(data) {
             const journalContainer = document.getElementById('journalText');
             if (!journalContainer) return;
             
-            const reflection = data.journalReflection || 'No reflections yet. Begin your journey by recording your thoughts and insights here.';
-            journalContainer.textContent = reflection;
+            const reflectionContent = renderReflectionContent(data.journalReflection);
+            journalContainer.innerHTML = reflectionContent;
             
             // Show the journal section if there's data
             const journalSection = document.getElementById('profileJournal');
@@ -6264,11 +6274,8 @@ Write a protection charm"></textarea>
         function loadReflectionForView() {
             const profile = loadProfile();
             const display = document.getElementById('reflectionTextDisplay');
-            if (profile.journalReflection && profile.journalReflection.trim()) {
-                display.innerHTML = profile.journalReflection;
-            } else {
-                display.innerHTML = 'No reflection yet. Click "Edit Reflection" to begin.';
-            }
+            const content = renderReflectionContent(profile.journalReflection);
+            display.innerHTML = content;
         }
 
 
